@@ -9,10 +9,7 @@ import hudson.triggers.SCMTrigger;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -102,11 +99,16 @@ public class ActiveNotifier implements FineGrainedNotifier {
               && notifier.getNotifyBackToNormal())
               || (result == Result.SUCCESS && notifier.getNotifySuccess())
               || (result == Result.UNSTABLE && notifier.getNotifyUnstable())) {
-              getRocket(r).publish(getBuildStatusMessage(r, notifier.includeTestSummary(),
-                notifier.includeCustomMessage(), true));//, getBuildColor(r));
-              if (notifier.getCommitInfoChoice().showAnything()) {
-                getRocket(r).publish(getCommitList(r));//, getBuildColor(r));
-              }
+              getRocket(r).publish(
+                getBuildStatusMessage(r, notifier.includeTestSummary(), notifier.includeCustomMessage(), true),
+                getEmoji(r),
+                getAvatar(r),
+                getAttachments(r));//, getBuildColor(r));
+              /*if (notifier.getCommitInfoChoice().showAnything()) {
+                getRocket(r).publish(getCommitList(r),
+                  getEmoji(r),
+                  getAvatar(r));//, getBuildColor(r));
+              }*/
             }
           }
         }
@@ -114,6 +116,57 @@ public class ActiveNotifier implements FineGrainedNotifier {
     } catch (IOException e) {
       LOGGER.info("Could not send rocket message");
     }
+  }
+
+  private List<Map<String, Object>> getAttachments(AbstractBuild r) {
+    List<Map<String, Object>> attachments = new ArrayList<>();
+
+    Map<String, Object> statusAttachment = new HashMap<>();
+    statusAttachment.put("color", getBuildColor(r));
+    statusAttachment.put("title", getTitle(r));
+    statusAttachment.put("text", getText(r));
+    attachments.add(statusAttachment);
+
+    if (notifier.getCommitInfoChoice().showAnything()) {
+      Map<String, Object> commitListAttachment = new HashMap<>();
+      statusAttachment.put("text", getCommitList(r));
+      attachments.add(commitListAttachment);
+    }
+    return attachments;
+  }
+
+  private String getText(AbstractBuild r) {
+    List<Result> badResults = Arrays.asList(Result.FAILURE, Result.ABORTED);
+    String culprits = StringUtils.join(r.getCulprits(), ", ");
+    if (badResults.contains(r.getResult())) {
+      return "Kröhöm " + culprits + "...";
+    }
+    return "Kiitos " + culprits + "!";
+  }
+
+  private String getTitle(AbstractBuild r) {
+    List<Result> badResults = Arrays.asList(Result.FAILURE, Result.ABORTED);
+    if (badResults.contains(r.getResult())) {
+
+      return "SON. I AM DISAPPOINT! VOISIKO JOKU KORJATA??";
+    }
+    return "SON. I AM PROUD!";
+  }
+
+  private String getBuildColor(AbstractBuild r) {
+    List<Result> redColors = Arrays.asList(Result.FAILURE, Result.ABORTED);
+    if (redColors.contains(r.getResult())) {
+      return "#ff0000";
+    }
+    return "#00ff00";
+  }
+
+  private String getAvatar(AbstractBuild r) {
+    return "https://oda.medidemo.fi/ci/static/c0bc6b40/images/headshot.png";
+  }
+
+  private String getEmoji(AbstractBuild r) {
+    return null;
   }
 
   String getChanges(AbstractBuild r, boolean includeCustomMessage, boolean finished) {
@@ -193,6 +246,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
   String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary, boolean includeCustomMessage, boolean finished) {
     MessageBuilder message = new MessageBuilder(notifier, r, finished);
+    message.append("@here ");
     message.appendStatusMessage();
     message.appendDuration();
     message.appendOpenLink();
