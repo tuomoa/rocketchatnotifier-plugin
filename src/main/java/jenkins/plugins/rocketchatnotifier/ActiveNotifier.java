@@ -129,7 +129,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
     if (notifier.getCommitInfoChoice().showAnything()) {
       Map<String, Object> commitListAttachment = new HashMap<>();
-      statusAttachment.put("text", getCommitList(r));
+      commitListAttachment.put("text", getCommitList(r));
       attachments.add(commitListAttachment);
     }
     return attachments;
