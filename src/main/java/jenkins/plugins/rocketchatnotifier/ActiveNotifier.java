@@ -139,7 +139,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
     List<Result> badResults = Arrays.asList(Result.FAILURE, Result.ABORTED);
     String culprits = StringUtils.join(r.getCulprits(), ", ");
     if (badResults.contains(r.getResult())) {
-      return "Kröhöm " + culprits + "...";
+      return "Kukkuu " + culprits + "...";
     }
     return "Kiitos " + culprits + "!";
   }
@@ -246,7 +246,6 @@ public class ActiveNotifier implements FineGrainedNotifier {
 
   String getBuildStatusMessage(AbstractBuild r, boolean includeTestSummary, boolean includeCustomMessage, boolean finished) {
     MessageBuilder message = new MessageBuilder(notifier, r, finished);
-    message.append("@here ");
     message.appendStatusMessage();
     message.appendDuration();
     message.appendOpenLink();
