@@ -1,12 +1,28 @@
 <a name=""></a>
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.1.2...v) (2018-02-15)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.2.2...v) (2018-08-25)
 
 
 ### Bug Fixes
 
+* **build:** Only deploy master ([bd26eb1](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/bd26eb1))
+* **Configuration:** Auto-Add https:// if no protocol was given ([e19d174](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e19d174))
+* **deploy:** Correct Maven Deploy logic (#JENKINS-52383) ([8adf86e](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/8adf86e)), closes [#JENKINS-52383](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-52383)
+* **NPE:** Corrected NPE error (#JENKINS-50448) ([808242c](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/808242c)), closes [#JENKINS-50448](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-50448)
+* **Plugin-URL:** Set correct plugin url ([d4f361a](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/d4f361a)), closes [#21](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/21)
+* **proxy:** Corrected proxy config (JENKINS-47858) ([1403cb6](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/1403cb6))
+* **Proxy:** Proxy detection with nested URIs and different Ports  ([9b6431c](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/9b6431c))
 * **proxy-error:** Resolve #JENKINS-47858 ([074a5e0](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/074a5e0)), closes [#JENKINS-47858](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-47858)
+* **SNI:** upgraded the http client to support SNI. (#JENKINS-48905) ([bb738ad](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/bb738ad)), closes [#JENKINS-48905](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-48905)
+* **ssl:** Corrected SSL Validation ([89400a0](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/89400a0))
 * **use-defaults:** applying global defaults ([4a8bdf7](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/4a8bdf7)), closes [#JENKINS-48486](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-48486)
 * **use-defaults:** applying global defaults ([673b6ea](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/673b6ea)), closes [#JENKINS-48486](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-48486)
+* obey channel parameter for messages sent via webhook ([503780d](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/503780d))
+* pom.xml to reduce vulnerabilities ([e6ab323](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e6ab323))
+
+
+### Features
+
+* **Attachments:** Adding attachment send to normal jobs ([ca4b80a](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/ca4b80a))
 
 
 

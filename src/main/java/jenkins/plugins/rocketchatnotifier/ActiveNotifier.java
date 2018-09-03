@@ -1,11 +1,18 @@
 package jenkins.plugins.rocketchatnotifier;
 
 import edu.umd.cs.findbugs.annotations.SuppressWarnings;
-import hudson.model.*;
+import hudson.model.AbstractBuild;
+import hudson.model.AbstractProject;
+import hudson.model.BuildListener;
+import hudson.model.Cause;
+import hudson.model.CauseAction;
+import hudson.model.Hudson;
+import hudson.model.Result;
 import hudson.scm.ChangeLogSet;
 import hudson.scm.ChangeLogSet.AffectedFile;
 import hudson.scm.ChangeLogSet.Entry;
 import hudson.triggers.SCMTrigger;
+import jenkins.plugins.rocketchatnotifier.model.MessageAttachment;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.IOException;
@@ -56,16 +63,18 @@ public class ActiveNotifier implements FineGrainedNotifier {
       String changes = getChanges(build, notifier.includeCustomMessage(), false);
       if (changes != null) {
         notifyStart(build, changes);
-      } else {
+      }
+      else {
         notifyStart(build, getBuildStatusMessage(build, false, notifier.includeCustomMessage(), false));
       }
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       LOGGER.info("Could not send rocket message");
     }
   }
 
   private void notifyStart(AbstractBuild build, String message) throws IOException {
-    getRocket(build).publish(message);
+    getRocket(build).publish(message, MessageAttachment.convertMessageAttachmentsToMaps(this.notifier.getAttachments()));
   }
 
   public void finalized(AbstractBuild r) {
@@ -113,7 +122,8 @@ public class ActiveNotifier implements FineGrainedNotifier {
           }
         }
       }
-    } catch (IOException e) {
+    }
+    catch (IOException e) {
       LOGGER.info("Could not send rocket message");
     }
   }
