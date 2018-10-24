@@ -16,17 +16,16 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -175,7 +174,10 @@ public class RocketChatClientCallBuilder {
 
   private HttpClient createHttpClient(boolean trustSSL) {
     if (!trustSSL) {
-      return new DefaultHttpClient();
+      PoolingHttpClientConnectionManager manager = new PoolingHttpClientConnectionManager();
+      manager.setDefaultMaxPerRoute(20);
+      HttpClient client = HttpClientBuilder.create().setConnectionManager(manager).build();
+      return client;
     }
 
     try {
@@ -197,13 +199,11 @@ public class RocketChatClientCallBuilder {
       }}, new SecureRandom());
 
       SSLSocketFactory sf = new SSLSocketFactory(sslContext);
-      Scheme httpsScheme = new Scheme("https", 443, sf);
-      SchemeRegistry schemeRegistry = new SchemeRegistry();
-      schemeRegistry.register(httpsScheme);
+      Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create().register("https", sf).build();
 
       // apache HttpClient version >4.2 should use BasicClientConnectionManager
-      ClientConnectionManager cm = new SingleClientConnManager(schemeRegistry);
-      HttpClient httpClient = new DefaultHttpClient(cm);
+      PoolingHttpClientConnectionManager manager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+      HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(manager).build();
       return httpClient;
     }
     catch (Exception e) {
