@@ -30,6 +30,8 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Map.Entry;
@@ -53,48 +55,55 @@ public class RocketChatClientCallBuilder {
 
   private final RocketChatCallAuthentication authentication;
 
-  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String user, String password) {
+  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String user, String password) throws RocketClientException {
     this(new RocketChatBasicCallAuthentication(serverUrl, user, password), serverUrl, trustSSL);
   }
 
-  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String webhookToken) {
+  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String webhookToken) throws RocketClientException {
     this(new RocketChatWebhookAuthentication(serverUrl, webhookToken), serverUrl, trustSSL);
   }
 
   protected RocketChatClientCallBuilder(RocketChatCallAuthentication authentication, String serverUrl,
-                                        boolean trustSSL) {
+                                        boolean trustSSL) throws RocketClientException {
     this.authentication = authentication;
     this.serverUrl = serverUrl;
+    try {
+      if (Jenkins.getInstance() != null && Jenkins.getInstance().proxy != null
+        && !NetworkUtils.isHostOnNoProxyList(this.serverUrl, Jenkins.getInstance().proxy)) {
+        final HttpClientBuilder clientBuilder = HttpClients.custom();
+        final ProxyConfiguration proxy = Jenkins.getInstance().proxy;
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
+        final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
 
-    if (Jenkins.getInstance() != null && Jenkins.getInstance().proxy != null
-      && !NetworkUtils.isHostOnNoProxyList(this.serverUrl, Jenkins.getInstance().proxy)) {
-      final HttpClientBuilder clientBuilder = HttpClients.custom();
-      final ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-      final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
-      final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+        clientBuilder.setRoutePlanner(routePlanner);
+        clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
 
-      clientBuilder.setRoutePlanner(routePlanner);
-      clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
+        String username = proxy.getUserName();
+        String password = proxy.getPassword();
+        // Consider it to be passed if username specified. Sufficient?
+        if (username != null && !"".equals(username.trim())) {
+          logger.info("Using proxy authentication (user=" + username + ")");
+          credentialsProvider.setCredentials(new AuthScope(proxyHost),
+            new UsernamePasswordCredentials(username, password));
+          if (!trustSSL) {
+            Unirest.setHttpClient(clientBuilder.build());
+          } else {
+            Unirest.setHttpClient(clientBuilder.setConnectionManager(getPoolingHttpClientConnectionManager()).build());
+          }
 
-      String username = proxy.getUserName();
-      String password = proxy.getPassword();
-      // Consider it to be passed if username specified. Sufficient?
-      if (username != null && !"".equals(username.trim())) {
-        logger.info("Using proxy authentication (user=" + username + ")");
-        credentialsProvider.setCredentials(new AuthScope(proxyHost),
-          new UsernamePasswordCredentials(username, password));
-        Unirest.setHttpClient(clientBuilder.build());
+        } else {
+          Unirest.setProxy(proxyHost);
+          Unirest.setHttpClient(createHttpClient(trustSSL));
+        }
+      } else {
+        Unirest.setHttpClient(createHttpClient(trustSSL));
       }
-      else {
-        Unirest.setProxy(proxyHost);
-      }
+      this.objectMapper = new ObjectMapper();
+      this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    } catch (Exception e) {
+      throw new RocketClientException(e);
     }
-    else {
-      Unirest.setHttpClient(createHttpClient(trustSSL));
-    }
-    this.objectMapper = new ObjectMapper();
-    this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
   }
 
 
@@ -137,8 +146,7 @@ public class RocketChatClientCallBuilder {
 
     try {
       return objectMapper.readValue(req.asString().getBody(), Response.class);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new RocketClientException(e);
     }
   }
@@ -166,8 +174,7 @@ public class RocketChatClientCallBuilder {
       HttpResponse<String> res = req.asString();
 
       return objectMapper.readValue(res.getBody(), Response.class);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       throw new RocketClientException(e);
     }
   }
@@ -176,38 +183,38 @@ public class RocketChatClientCallBuilder {
     if (!trustSSL) {
       PoolingHttpClientConnectionManager manager = new PoolingHttpClientConnectionManager();
       manager.setDefaultMaxPerRoute(20);
-      HttpClient client = HttpClientBuilder.create().setConnectionManager(manager).build();
-      return client;
+      return HttpClientBuilder.create().setConnectionManager(manager).build();
+    } else {
+      try {
+        return HttpClientBuilder.create().setConnectionManager(getPoolingHttpClientConnectionManager()).build();
+      } catch (Exception e) {
+        throw new IllegalStateException(e.getMessage(), e);
+      }
     }
+  }
 
-    try {
-      SSLContext sslContext = SSLContext.getInstance("SSL");
+  private PoolingHttpClientConnectionManager getPoolingHttpClientConnectionManager() throws NoSuchAlgorithmException, KeyManagementException {
+    SSLContext sslContext = SSLContext.getInstance("SSL");
 
-      // set up a TrustManager that trusts everything
-      sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-        public X509Certificate[] getAcceptedIssuers() {
-          return null;
-        }
+    // set up a TrustManager that trusts everything
+    sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+      public X509Certificate[] getAcceptedIssuers() {
+        return null;
+      }
 
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-          // intentionally left blank
-        }
+      public void checkClientTrusted(X509Certificate[] certs, String authType) {
+        // intentionally left blank
+      }
 
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-          // intentionally left blank
-        }
-      }}, new SecureRandom());
+      public void checkServerTrusted(X509Certificate[] certs, String authType) {
+        // intentionally left blank
+      }
+    }}, new SecureRandom());
 
-      SSLSocketFactory sf = new SSLSocketFactory(sslContext);
-      Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory> create().register("https", sf).build();
+    SSLSocketFactory sf = new SSLSocketFactory(sslContext);
+    Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create().register("https", sf).build();
 
-      // apache HttpClient version >4.2 should use BasicClientConnectionManager
-      PoolingHttpClientConnectionManager manager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-      HttpClient httpClient = HttpClientBuilder.create().setConnectionManager(manager).build();
-      return httpClient;
-    }
-    catch (Exception e) {
-      throw new IllegalStateException(e.getMessage(), e);
-    }
+    // apache HttpClient version >4.2 should use BasicClientConnectionManager
+    return new PoolingHttpClientConnectionManager(socketFactoryRegistry);
   }
 }

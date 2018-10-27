@@ -37,7 +37,7 @@ public class RocketChatClientImpl implements RocketChatClient {
    * @param user      which to authenticate with
    * @param password  of the user to authenticate with
    */
-  public RocketChatClientImpl(String serverUrl, boolean trustSSL, String user, String password) {
+  public RocketChatClientImpl(String serverUrl, boolean trustSSL, String user, String password) throws RocketClientException {
     this.callBuilder = new RocketChatClientCallBuilder(serverUrl, trustSSL, JSONValue.escape(user), JSONValue.escape(password));
   }
 
@@ -49,7 +49,7 @@ public class RocketChatClientImpl implements RocketChatClient {
    * @param trustSSL     if set set the SSL certificate of the rocket server will not be checked
    * @param webhookToken authentication token or URL
    */
-  public RocketChatClientImpl(String serverUrl, boolean trustSSL, String webhookToken) {
+  public RocketChatClientImpl(String serverUrl, boolean trustSSL, String webhookToken) throws RocketClientException {
     LOG.info("Creating new instance for rocket " + serverUrl + " (trustSSL: " + trustSSL + ")");
     this.callBuilder = new RocketChatClientCallBuilder(serverUrl, trustSSL, webhookToken);
   }
@@ -151,8 +151,7 @@ public class RocketChatClientImpl implements RocketChatClient {
     if (this.getInfo().getVersion().compareTo("0.50.1") >= 0) {
       if (emoji != null) {
         body.put("emoji", emoji);
-      }
-      else if (avatar != null) {
+      } else if (avatar != null) {
         body.put("avatar", avatar);
       }
       if (attachments != null && attachments.size() > 0) {
@@ -163,8 +162,7 @@ public class RocketChatClientImpl implements RocketChatClient {
 
     if (res.isSuccessful()) {
       LOG.fine("Message sent was successfull.");
-    }
-    else {
+    } else {
       LOG.severe("Could not send message: " + res);
       throw new RocketClientException("The send of the message was unsuccessful.");
     }
