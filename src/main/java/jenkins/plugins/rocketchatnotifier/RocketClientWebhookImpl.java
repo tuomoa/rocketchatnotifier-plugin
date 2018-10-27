@@ -7,11 +7,11 @@ import hudson.security.ACL;
 import jenkins.model.Jenkins;
 import jenkins.plugins.rocketchatnotifier.rocket.RocketChatClient;
 import jenkins.plugins.rocketchatnotifier.rocket.RocketChatClientImpl;
+import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
 import sun.security.validator.ValidatorException;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class RocketClientWebhookImpl implements RocketClient {
 
   private String channel;
 
-  public RocketClientWebhookImpl(String serverUrl, boolean trustSSL, String token, String tokenCredentialId, String channel) {
+  public RocketClientWebhookImpl(String serverUrl, boolean trustSSL, String token, String tokenCredentialId, String channel) throws RocketClientException {
     client = new RocketChatClientImpl(serverUrl, trustSSL, getTokenToUse(tokenCredentialId, token));
     this.channel = channel;
   }
@@ -36,12 +36,10 @@ public class RocketClientWebhookImpl implements RocketClient {
       LOGGER.fine("Starting sending message to webhook");
       this.client.send(this.channel, message);
       return true;
-    }
-    catch (IOException e) {
+    } catch (RocketClientException e) {
       LOGGER.log(Level.SEVERE, "I/O error error during publishing message", e);
       return false;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Unknown error error during publishing message", e);
       return false;
     }
@@ -54,19 +52,17 @@ public class RocketClientWebhookImpl implements RocketClient {
       LOGGER.fine("Starting sending message to webhook");
       this.client.send(this.channel, message, emoji, avatar, attachments);
       return true;
-    }
-    catch (IOException e) {
+    } catch (RocketClientException e) {
       LOGGER.log(Level.SEVERE, "I/O error error during publishing message", e);
       return false;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Unknown error error during publishing message", e);
       return false;
     }
   }
 
   @Override
-  public void validate() throws ValidatorException, IOException {
+  public void validate() throws ValidatorException, RocketClientException {
     this.client.send("", "Test message from Jenkins via Webhook");
   }
 
