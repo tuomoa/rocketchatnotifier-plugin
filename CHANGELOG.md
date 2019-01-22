@@ -1,4 +1,4 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.3.1...v) (2018-12-26)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.3.1...v) (2019-01-22)
 
 
 ### Bug Fixes
@@ -8,6 +8,7 @@
 * **Configuration:** Auto-Add https:// if no protocol was given ([e19d174](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e19d174))
 * **Connections-Pooling:** Use PoolingHttpClientConnectionManager to fix multiple requests ([f718cf2](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/f718cf2))
 * **deploy:** Correct Maven Deploy logic (#JENKINS-52383) ([8adf86e](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/8adf86e)), closes [#JENKINS-52383](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-52383)
+* **Error-Handling:** Avoid possible NPE ([c49d31e](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/c49d31e))
 * **MessageAttachment:** Change type string to boolean ([#25](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/25)) ([e3b9eaa](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e3b9eaa))
 * **NPE:** Corrected NPE error (#JENKINS-50448) ([808242c](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/808242c)), closes [#JENKINS-50448](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/JENKINS-50448)
 * **Plugin-URL:** Set correct plugin url ([d4f361a](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/d4f361a)), closes [#21](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/21)
@@ -19,9 +20,9 @@
 * **ssl:** Corrected SSL Validation ([89400a0](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/89400a0))
 * **SSL-Config:** Use ssl settings in client, too ([5202e06](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/5202e06))
 * **Tests:** Make ITs work again ([7f065e2](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/7f065e2))
-* pom.xml to reduce vulnerabilities ([38fd3ab](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/38fd3ab))
 * pom.xml to reduce vulnerabilities ([5b6885c](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/5b6885c))
 * pom.xml to reduce vulnerabilities ([e6ab323](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e6ab323))
+* pom.xml to reduce vulnerabilities ([38fd3ab](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/38fd3ab))
 
 
 ### Features
