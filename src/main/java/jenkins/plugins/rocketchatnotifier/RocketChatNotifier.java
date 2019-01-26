@@ -522,7 +522,7 @@ public class RocketChatNotifier extends Notifier {
                                            @QueryParameter("rocketPassword") final String password,
                                            @QueryParameter("rocketChannel") final String channel,
                                            @QueryParameter("rocketBuildServerUrl") final String buildServerUrl,
-                                           @QueryParameter("webhookToken") final String webhookToken,
+                                           @QueryParameter("webhookToken") final String token,
                                            @QueryParameter("tokenCredentialId") final String webhookTokenCredentialId) throws FormException {
       try {
         String targetServerUrl = rocketServerUrl + RocketClientImpl.API_PATH;
@@ -549,7 +549,7 @@ public class RocketChatNotifier extends Notifier {
         if (StringUtils.isEmpty(targetBuildServerUrl)) {
           targetBuildServerUrl = this.buildServerUrl;
         }
-        String targetWebhookToken = webhookToken;
+        String targetWebhookToken = token;
         if (StringUtils.isEmpty(targetWebhookToken)) {
           targetWebhookToken = this.webhookToken;
         }
