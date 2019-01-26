@@ -8,6 +8,9 @@ language: java
 env:
   matrix:
    - RC_VERSION=latest
+   - RC_VERSION=0.73.2
+   - RC_VERSION=0.72.3
+   - RC_VERSION=0.71.2
    - RC_VERSION=0.70.4
    - RC_VERSION=0.69.2
    - RC_VERSION=0.68.5
