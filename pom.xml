@@ -37,7 +37,7 @@
 
   <name>RocketChat Notifier</name>
   <artifactId>rocketchatnotifier</artifactId>
-  <version>1.4.0</version>
+  <version>1.4.1</version>
   <packaging>hpi</packaging>
 
   <licenses>
@@ -102,6 +102,7 @@
               <releaseBranchPrefix>release/</releaseBranchPrefix>
               <hotfixBranchPrefix>hotfix/</hotfixBranchPrefix>
               <supportBranchPrefix>support/</supportBranchPrefix>
+              <versionTagPrefix>v</versionTagPrefix>
               <origin>origin</origin>
             </gitFlowConfig>
             <keepBranch>false</keepBranch>
