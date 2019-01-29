@@ -117,6 +117,9 @@ public class ActiveNotifier implements FineGrainedNotifier {
                 notifier.getCommitInfoChoice().showAnything()) {
                 getRocket(r).publish(getCommitList(r), MessageAttachment.convertMessageAttachmentsToMaps(this.notifier.getAttachments()));//, getBuildColor(r));
               }
+              if (result == Result.FAILURE && notifier.includeTestLog()) {
+                getRocket(r).publish(getLog(r), MessageAttachment.convertMessageAttachmentsToMaps(this.notifier.getAttachments()));//, getBuildColor(r));
+              }
             }
           }
         }
@@ -159,6 +162,12 @@ public class ActiveNotifier implements FineGrainedNotifier {
     if (includeCustomMessage) {
       message.appendCustomMessage();
     }
+    return message.toString();
+  }
+
+  String getLog(AbstractBuild r) {
+    MessageBuilder message = new MessageBuilder(notifier, r, true);
+    message.appendLog();
     return message.toString();
   }
 

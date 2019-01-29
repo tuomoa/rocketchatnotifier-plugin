@@ -38,6 +38,10 @@
             <f:checkbox name="includeTestSummary" value="true" checked="${instance.includeTestSummary()}"/>
         </f:entry>
 
+        <f:entry title="Include Test Log">
+            <f:checkbox name="includeTestLog" value="true" checked="${instance.includeTestLog()}"/>
+        </f:entry>
+
         <f:entry title="Sent RAW message">
             <f:checkbox name="rawMessage" value="true" checked="${instance.isRawMessage()}"/>
         </f:entry>

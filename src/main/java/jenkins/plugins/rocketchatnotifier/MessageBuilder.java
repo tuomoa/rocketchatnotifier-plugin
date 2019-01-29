@@ -11,6 +11,7 @@ import hudson.util.LogTaskListener;
 
 import java.io.IOException;
 import java.util.logging.Logger;
+import java.util.List;
 
 import static java.util.logging.Level.INFO;
 import static java.util.logging.Level.SEVERE;
@@ -184,6 +185,22 @@ public class MessageBuilder {
     }
     message.append("\n");
     message.append(envVars.expand(customMessage));
+    return this;
+  }
+
+  MessageBuilder appendLog() {
+    List<String> logs = null;
+    try {
+      logs = build.getLog(100);
+    } catch (IOException e) {
+      LOGGER.log(SEVERE, e.getMessage(), e);
+    }
+    if (logs != null) {
+      for (String log : logs) {
+        message.append("\n");
+        message.append(log);
+      }
+    }
     return this;
   }
 
