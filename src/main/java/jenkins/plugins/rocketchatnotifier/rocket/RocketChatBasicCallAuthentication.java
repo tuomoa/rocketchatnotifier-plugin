@@ -48,7 +48,7 @@ public class RocketChatBasicCallAuthentication implements RocketChatCallAuthenti
     try {
       loginResult = Unirest.post(apiURL).field("user", user).field("password", password).asJson();
     } catch (UnirestException e) {
-      throw new RocketClientException("Please check if the server API " + apiURL + " is correct: " + e.getMessage(), e);
+      throw new RocketClientException("Please check if the server API " + apiURL + " is correct: (Login-Error 1)", e);
     }
 
     if (loginResult.getStatus() == 401) {
@@ -62,7 +62,7 @@ public class RocketChatBasicCallAuthentication implements RocketChatCallAuthenti
         this.authToken = password;
       } catch (UnirestException e) {
         // TODO more logging
-        throw new RocketClientException("Please check if the server API " + apiURL + " is correct: " + e.getMessage(), e);
+        throw new RocketClientException("Please check if the server API " + apiURL + " is correct (Login-Error 2)", e);
       }
     } else {
       JSONObject data = loginResult.getBody().getObject().getJSONObject("data");
@@ -71,7 +71,7 @@ public class RocketChatBasicCallAuthentication implements RocketChatCallAuthenti
     }
 
     if (loginResult.getStatus() != 200) {
-      throw new RocketClientException("The login failed with a result of: " + loginResult.getStatus());
+      throw new RocketClientException("The login failed with a result of (Login-Error 3): " + loginResult.getStatus());
     }
   }
 

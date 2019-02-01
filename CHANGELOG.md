@@ -1,4 +1,9 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-01-26)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-02-01)
+
+
+### Bug Fixes
+
+* **RocketChatClientCallBuilder:** fix proxy access without credentials (JENKINS-55890) ([4d27927](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/4d27927))
 
 
 ### Features
