@@ -1,14 +1,16 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-02-01)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-04-20)
 
 
 ### Bug Fixes
 
+* **Message sent:** Improve error handling ([ec36a79](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/ec36a79))
 * **RocketChatClientCallBuilder:** fix proxy access without credentials (JENKINS-55890) ([4d27927](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/4d27927))
 
 
 ### Features
 
 * **Authentication:** Adding support for personal token login ([4108174](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/4108174))
+* **Testing:** Adding most recent rocketchat versions ([89c5381](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/89c5381))
 
 
 

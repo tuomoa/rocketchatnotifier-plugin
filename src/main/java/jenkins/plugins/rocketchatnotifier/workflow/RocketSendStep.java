@@ -222,22 +222,33 @@ public class RocketSendStep extends AbstractStepImpl {
       // placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
       listener.getLogger().println(Messages.RocketSendStepConfig(channel, step.message));
 
-      RocketClient rocketClient = getRocketClient(server, trustSSL, user, password, channel, webhookToken, webhookTokenCredentialId);
+      // getRocketClient needs to be wrapped inside a try-catch because it can fail too if the target RocketChat server does not behave properly.
+      try {
+        RocketClient rocketClient = getRocketClient(server, trustSSL, user, password, channel, webhookToken, webhookTokenCredentialId);
 
-      String msg = step.message;
-      if (!step.rawMessage) {
-        msg += "," + run.getFullDisplayName() + "," + jenkinsUrl + run.getUrl() + "";
-      }
+        String msg = step.message;
+        if (!step.rawMessage) {
+          msg += "," + run.getFullDisplayName() + "," + jenkinsUrl + run.getUrl() + "";
+        }
 
-      boolean publishSuccess = rocketClient.publish(msg, step.emoji, step.avatar,
-        MessageAttachment.convertMessageAttachmentsToMaps(step.attachments));
-      if (!publishSuccess && step.failOnError) {
-        throw new AbortException(Messages.NotificationFailed());
+        boolean publishSuccess = rocketClient.publish(msg, step.emoji, step.avatar,
+          MessageAttachment.convertMessageAttachmentsToMaps(step.attachments));
+        if (!publishSuccess && step.failOnError) {
+          throw new AbortException(Messages.NotificationFailed());
+        }
+        else if (!publishSuccess) {
+          listener.error(Messages.NotificationFailed());
+        }
+        return null;
+
+      } catch (RocketClientException rce) {
+        if (step.failOnError) {
+          throw rce;
+        } else {
+          listener.error(Messages.NotificationFailedWithException(rce));
+          return null;
+        }
       }
-      else if (!publishSuccess) {
-        listener.error(Messages.NotificationFailed());
-      }
-      return null;
     }
 
     //streamline unit testing
