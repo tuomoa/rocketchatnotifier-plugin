@@ -19,6 +19,7 @@ import hudson.util.ListBoxModel;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 import jenkins.plugins.rocketchatnotifier.model.MessageAttachment;
+import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.apache.commons.lang.BooleanUtils;
@@ -60,6 +61,7 @@ public class RocketChatNotifier extends Notifier {
   private boolean notifyBackToNormal;
   private boolean notifyRepeatedFailure;
   private boolean includeTestSummary;
+  private boolean includeTestLog;
   private CommitInfoChoice commitInfoChoice;
   private boolean includeCustomMessage;
   private String customMessage;
@@ -135,6 +137,10 @@ public class RocketChatNotifier extends Notifier {
 
   public boolean includeTestSummary() {
     return includeTestSummary;
+  }
+
+  public boolean includeTestLog() {
+    return includeTestLog;
   }
 
   public boolean getNotifyRepeatedFailure() {
@@ -243,6 +249,15 @@ public class RocketChatNotifier extends Notifier {
     this.includeTestSummary = includeTestSummary;
   }
 
+  public boolean isIncludeTestLog() {
+    return includeTestLog;
+  }
+
+  @DataBoundSetter
+  public void setIncludeTestLog(boolean includeTestLog) {
+    this.includeTestLog = includeTestLog;
+  }
+
   @DataBoundSetter
   public void setCommitInfoChoice(CommitInfoChoice commitInfoChoice) {
     this.commitInfoChoice = commitInfoChoice;
@@ -290,7 +305,7 @@ public class RocketChatNotifier extends Notifier {
   public RocketChatNotifier(final String rocketServerUrl, final boolean trustSSL, final String username, final String password, final String channel, final String buildServerUrl,
                             final boolean startNotification, final boolean notifyAborted, final boolean notifyFailure,
                             final boolean notifyNotBuilt, final boolean notifySuccess, final boolean notifyUnstable, final boolean notifyBackToNormal,
-                            final boolean notifyRepeatedFailure, final boolean includeTestSummary, CommitInfoChoice commitInfoChoice,
+                            final boolean notifyRepeatedFailure, final boolean includeTestSummary, final boolean includeTestLog, CommitInfoChoice commitInfoChoice,
                             boolean includeCustomMessage, final boolean rawMessage, String customMessage, List<MessageAttachment> attachments, String webhookToken, String tokenCredentialId) {
     super();
     this.rocketServerUrl = rocketServerUrl;
@@ -308,6 +323,7 @@ public class RocketChatNotifier extends Notifier {
     this.notifyBackToNormal = notifyBackToNormal;
     this.notifyRepeatedFailure = notifyRepeatedFailure;
     this.includeTestSummary = includeTestSummary;
+    this.includeTestLog = includeTestLog;
     this.commitInfoChoice = commitInfoChoice;
     this.includeCustomMessage = includeCustomMessage;
     this.rawMessage = rawMessage;
@@ -321,7 +337,7 @@ public class RocketChatNotifier extends Notifier {
     return BuildStepMonitor.NONE;
   }
 
-  public RocketClient newRocketChatClient(AbstractBuild r, BuildListener listener) throws IOException {
+  public RocketClient newRocketChatClient(AbstractBuild r, BuildListener listener) throws RocketClientException {
     String serverUrl = this.rocketServerUrl;
     if (StringUtils.isEmpty(serverUrl)) {
       serverUrl = getDescriptor().getRocketServerUrl();
@@ -461,6 +477,7 @@ public class RocketChatNotifier extends Notifier {
         boolean notifyBackToNormal = "true".equals(sr.getParameter("rocketNotifyBackToNormal"));
         boolean notifyRepeatedFailure = "true".equals(sr.getParameter("rocketNotifyRepeatedFailure"));
         boolean includeTestSummary = "true".equals(sr.getParameter("includeTestSummary"));
+        boolean includeTestLog = "true".equals(sr.getParameter("includeTestLog"));
         CommitInfoChoice commitInfoChoice = CommitInfoChoice.forDisplayName(sr.getParameter("rocketCommitInfoChoice"));
         boolean includeCustomMessage = "on".equals(sr.getParameter("includeCustomMessage"));
         boolean rawMessage = BooleanUtils.toBoolean(sr.getParameter("rawMessage"));
@@ -482,7 +499,7 @@ public class RocketChatNotifier extends Notifier {
         String webhookTokenCredentialId = json.getString("tokenCredentialId");
         return new RocketChatNotifier(rocketServerUrl, trustSSL, username, password, channel, buildServerUrl, startNotification, notifyAborted,
           notifyFailure, notifyNotBuilt, notifySuccess, notifyUnstable, notifyBackToNormal, notifyRepeatedFailure,
-          includeTestSummary, commitInfoChoice, includeCustomMessage, rawMessage, customMessage, attachments, webhookToken, webhookTokenCredentialId);
+          includeTestSummary, includeTestLog, commitInfoChoice, includeCustomMessage, rawMessage, customMessage, attachments, webhookToken, webhookTokenCredentialId);
       }
       return null;
     }
@@ -521,7 +538,7 @@ public class RocketChatNotifier extends Notifier {
                                            @QueryParameter("rocketPassword") final String password,
                                            @QueryParameter("rocketChannel") final String channel,
                                            @QueryParameter("rocketBuildServerUrl") final String buildServerUrl,
-                                           @QueryParameter("webhookToken") final String webhookToken,
+                                           @QueryParameter("webhookToken") final String token,
                                            @QueryParameter("tokenCredentialId") final String webhookTokenCredentialId) throws FormException {
       try {
         String targetServerUrl = rocketServerUrl + RocketClientImpl.API_PATH;
@@ -548,7 +565,7 @@ public class RocketChatNotifier extends Notifier {
         if (StringUtils.isEmpty(targetBuildServerUrl)) {
           targetBuildServerUrl = this.buildServerUrl;
         }
-        String targetWebhookToken = webhookToken;
+        String targetWebhookToken = token;
         if (StringUtils.isEmpty(targetWebhookToken)) {
           targetWebhookToken = this.webhookToken;
         }
@@ -573,13 +590,15 @@ public class RocketChatNotifier extends Notifier {
         LOGGER.fine("Done publishing message");
         return FormValidation.ok("Success");
       }
-      catch (ValidatorException | SSLHandshakeException e) {
-        LOGGER.log(Level.SEVERE, "SSL error during trying to send rocket message", e);
-        return FormValidation.error(e, "SSL error", e);
-      }
       catch (Exception e) {
-        LOGGER.log(Level.SEVERE, "Client error during trying to send rocket message", e);
-        return FormValidation.error(e, "Client error - Could not send message");
+        if (e.getCause() != null &&
+          e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == ValidatorException.class) {
+          LOGGER.log(Level.SEVERE, "SSL error during trying to send rocket message", e);
+          return FormValidation.error(e, "SSL error", e);
+        } else {
+          LOGGER.log(Level.SEVERE, "Client error during trying to send rocket message", e);
+          return FormValidation.error(e, "Client error - Could not send message");
+        }
       }
     }
 
@@ -623,6 +642,7 @@ public class RocketChatNotifier extends Notifier {
     private boolean notifyBackToNormal;
     private boolean notifyRepeatedFailure;
     private boolean includeTestSummary;
+    private boolean includeTestLog;
     private boolean showCommitList;
     private boolean includeCustomMessage;
     private String customMessage;
@@ -642,6 +662,7 @@ public class RocketChatNotifier extends Notifier {
                              boolean notifyBackToNormal,
                              boolean notifyRepeatedFailure,
                              boolean includeTestSummary,
+                             boolean includeTestLog,
                              boolean showCommitList,
                              boolean includeCustomMessage,
                              String customMessage) {
@@ -659,6 +680,7 @@ public class RocketChatNotifier extends Notifier {
       this.notifyBackToNormal = notifyBackToNormal;
       this.notifyRepeatedFailure = notifyRepeatedFailure;
       this.includeTestSummary = includeTestSummary;
+      this.includeTestLog = includeTestLog;
       this.showCommitList = showCommitList;
       this.includeCustomMessage = includeCustomMessage;
       this.customMessage = customMessage;
@@ -737,6 +759,11 @@ public class RocketChatNotifier extends Notifier {
     @Exported
     public boolean includeTestSummary() {
       return includeTestSummary;
+    }
+
+    @Exported
+    public boolean includeTestLog() {
+      return includeTestLog;
     }
 
     @Exported

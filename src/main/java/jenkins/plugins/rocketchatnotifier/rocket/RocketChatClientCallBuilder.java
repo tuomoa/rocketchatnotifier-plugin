@@ -4,34 +4,36 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
 import com.mashape.unirest.request.HttpRequestWithBody;
 import hudson.ProxyConfiguration;
 import jenkins.model.Jenkins;
 import jenkins.plugins.rocketchatnotifier.model.Response;
+import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import jenkins.plugins.rocketchatnotifier.utils.NetworkUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
-import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
 import org.apache.http.conn.routing.HttpRoutePlanner;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
-import org.apache.http.impl.conn.SingleClientConnManager;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.Map.Entry;
@@ -51,65 +53,39 @@ public class RocketChatClientCallBuilder {
 
   private final ObjectMapper objectMapper;
 
-  private String serverUrl;
-
   private final RocketChatCallAuthentication authentication;
 
-  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String user, String password) {
+  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String user, String password) throws RocketClientException {
     this(new RocketChatBasicCallAuthentication(serverUrl, user, password), serverUrl, trustSSL);
   }
 
-  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String webhookToken) {
+  protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String webhookToken) throws RocketClientException {
     this(new RocketChatWebhookAuthentication(serverUrl, webhookToken), serverUrl, trustSSL);
   }
 
   protected RocketChatClientCallBuilder(RocketChatCallAuthentication authentication, String serverUrl,
-                                        boolean trustSSL) {
+                                        boolean trustSSL) throws RocketClientException {
     this.authentication = authentication;
-    this.serverUrl = serverUrl;
-
-    if (Jenkins.getInstance() != null && Jenkins.getInstance().proxy != null
-      && !NetworkUtils.isHostOnNoProxyList(this.serverUrl, Jenkins.getInstance().proxy)) {
-      final HttpClientBuilder clientBuilder = HttpClients.custom();
-      final ProxyConfiguration proxy = Jenkins.getInstance().proxy;
-      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-      final HttpHost proxyHost = new HttpHost(proxy.name, proxy.port);
-      final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
-
-      clientBuilder.setRoutePlanner(routePlanner);
-      clientBuilder.setDefaultCredentialsProvider(credentialsProvider);
-
-      String username = proxy.getUserName();
-      String password = proxy.getPassword();
-      // Consider it to be passed if username specified. Sufficient?
-      if (username != null && !"".equals(username.trim())) {
-        logger.info("Using proxy authentication (user=" + username + ")");
-        credentialsProvider.setCredentials(new AuthScope(proxyHost),
-          new UsernamePasswordCredentials(username, password));
-        Unirest.setHttpClient(clientBuilder.build());
-      }
-      else {
-        Unirest.setProxy(proxyHost);
-      }
-    }
-    else {
-      Unirest.setHttpClient(createHttpClient(trustSSL));
-    }
     this.objectMapper = new ObjectMapper();
     this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
+    try {
+      Unirest.setHttpClient(createHttpClient(serverUrl, trustSSL));
+    } catch (Exception e) {
+      throw new RocketClientException(e);
+    }
   }
 
-
-  protected Response buildCall(RocketChatRestApiV1 call) throws IOException {
+  protected Response buildCall(RocketChatRestApiV1 call) throws RocketClientException {
     return this.buildCall(call, null, null);
   }
 
-  protected Response buildCall(RocketChatRestApiV1 call, RocketChatQueryParams queryParams) throws IOException {
+  protected Response buildCall(RocketChatRestApiV1 call, RocketChatQueryParams queryParams) throws RocketClientException {
     return this.buildCall(call, queryParams, null);
   }
 
   protected Response buildCall(RocketChatRestApiV1 call, RocketChatQueryParams queryParams, Object body)
-    throws IOException {
+    throws RocketClientException {
     if (call.requiresAuth() && !authentication.isAuthenticated()) {
       authentication.doAuthentication();
     }
@@ -120,11 +96,11 @@ public class RocketChatClientCallBuilder {
       case POST:
         return this.buildPostCall(call, queryParams, body);
       default:
-        throw new IOException("Http Method " + call.getHttpMethod().toString() + " is not supported.");
+        throw new RocketClientException("Http Method " + call.getHttpMethod().toString() + " is not supported.");
     }
   }
 
-  private Response buildGetCall(RocketChatRestApiV1 call, RocketChatQueryParams queryParams) throws IOException {
+  private Response buildGetCall(RocketChatRestApiV1 call, RocketChatQueryParams queryParams) throws RocketClientException {
     GetRequest req = Unirest.get(authentication.getUrlForRequest(call));
 
     if (call.requiresAuth()) {
@@ -138,17 +114,14 @@ public class RocketChatClientCallBuilder {
     }
 
     try {
-      HttpResponse<String> res = req.asString();
-
-      return objectMapper.readValue(res.getBody(), Response.class);
-    }
-    catch (UnirestException e) {
-      throw new IOException(e);
+      return objectMapper.readValue(req.asString().getBody(), Response.class);
+    } catch (Exception e) {
+      throw new RocketClientException(e);
     }
   }
 
   private Response buildPostCall(RocketChatRestApiV1 call, RocketChatQueryParams queryParams, Object body)
-    throws IOException {
+    throws RocketClientException {
     HttpRequestWithBody req = Unirest.post(authentication.getUrlForRequest(call)).header("Content-Type",
       "application/json");
 
@@ -162,55 +135,95 @@ public class RocketChatClientCallBuilder {
       }
     }
 
-    if (body != null) {
-      req.body(objectMapper.writeValueAsString(body));
-    }
-
     try {
+
+      if (body != null) {
+        req.body(objectMapper.writeValueAsString(body));
+      }
       HttpResponse<String> res = req.asString();
 
       return objectMapper.readValue(res.getBody(), Response.class);
-    }
-    catch (UnirestException e) {
-      throw new IOException(e);
+    } catch (Exception e) {
+      throw new RocketClientException(e);
     }
   }
 
-  private HttpClient createHttpClient(boolean trustSSL) {
-    if (!trustSSL) {
-      return new DefaultHttpClient();
+  private static HttpClient createHttpClient(String serverUrl, boolean trustSSL) throws KeyManagementException, NoSuchAlgorithmException {
+    final HttpClientBuilder httpClientBuilder = HttpClients.custom();
+
+    setConnectionManager(httpClientBuilder, trustSSL);
+   
+    ProxyConfiguration proxyConfiguration = getProxyConfiguration(serverUrl);
+    if (proxyConfiguration != null) {
+      setProxy(httpClientBuilder, proxyConfiguration);
     }
 
-    try {
-      SSLContext sslContext = SSLContext.getInstance("SSL");
+    return httpClientBuilder.build();
+  }
 
-      // set up a TrustManager that trusts everything
-      sslContext.init(null, new TrustManager[]{new X509TrustManager() {
-        public X509Certificate[] getAcceptedIssuers() {
-          return null;
-        }
+  private static void setConnectionManager(HttpClientBuilder httpClientBuilder, boolean trustSSL)
+    throws NoSuchAlgorithmException, KeyManagementException {
 
-        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-          // intentionally left blank
-        }
+    PoolingHttpClientConnectionManager manager;
+    if (trustSSL) {
+      SSLContext sslContext = createAlwaysTrustingSSLContext();
 
-        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-          // intentionally left blank
-        }
-      }}, new SecureRandom());
+      Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder.<ConnectionSocketFactory>create()
+        .register("https", new SSLConnectionSocketFactory(sslContext, NoopHostnameVerifier.INSTANCE))
+        .register("http", PlainConnectionSocketFactory.getSocketFactory())
+        .build();
 
-      SSLSocketFactory sf = new SSLSocketFactory(sslContext);
-      Scheme httpsScheme = new Scheme("https", 443, sf);
-      SchemeRegistry schemeRegistry = new SchemeRegistry();
-      schemeRegistry.register(httpsScheme);
+      manager = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
 
-      // apache HttpClient version >4.2 should use BasicClientConnectionManager
-      ClientConnectionManager cm = new SingleClientConnManager(schemeRegistry);
-      HttpClient httpClient = new DefaultHttpClient(cm);
-      return httpClient;
+    } else {
+      manager = new PoolingHttpClientConnectionManager();
     }
-    catch (Exception e) {
-      throw new IllegalStateException(e.getMessage(), e);
+
+    manager.setDefaultMaxPerRoute(20);
+
+    httpClientBuilder.setConnectionManager(manager);
+  }
+
+  private static SSLContext createAlwaysTrustingSSLContext() throws NoSuchAlgorithmException, KeyManagementException {
+    SSLContext sslContext = SSLContext.getInstance("SSL");
+
+    // set up a TrustManager that trusts everything
+    sslContext.init(null, new TrustManager[]{new X509TrustManager() {
+      public X509Certificate[] getAcceptedIssuers() {
+        return null;
+      }
+
+      public void checkClientTrusted(X509Certificate[] certs, String authType) {
+        // intentionally left blank
+      }
+
+      public void checkServerTrusted(X509Certificate[] certs, String authType) {
+        // intentionally left blank
+      }
+    }}, new SecureRandom());
+
+    return sslContext;
+  }
+
+  private static ProxyConfiguration getProxyConfiguration(String serverUrl) {
+    Jenkins jenkinsInstance = Jenkins.getInstance();
+    return jenkinsInstance != null && jenkinsInstance.proxy != null && !NetworkUtils.isHostOnNoProxyList(serverUrl, jenkinsInstance.proxy)
+      ? jenkinsInstance.proxy
+      : null;
+  }
+
+  private static void setProxy(HttpClientBuilder httpClientBuilder, ProxyConfiguration proxyConfiguration) {
+    final HttpHost proxyHost = new HttpHost(proxyConfiguration.name, proxyConfiguration.port);
+    final HttpRoutePlanner routePlanner = new DefaultProxyRoutePlanner(proxyHost);
+    httpClientBuilder.setRoutePlanner(routePlanner);
+
+    final String username = proxyConfiguration.getUserName();
+    if (username != null && !username.trim().isEmpty()) {
+      logger.info("Using proxy authentication (user=" + username + ")");
+
+      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+      credentialsProvider.setCredentials(new AuthScope(proxyHost), new UsernamePasswordCredentials(username, proxyConfiguration.getPassword()));
+      httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
     }
   }
 }

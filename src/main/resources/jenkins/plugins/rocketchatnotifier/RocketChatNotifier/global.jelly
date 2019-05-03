@@ -23,10 +23,13 @@
       <f:checkbox field="trustSSL" name="trustSSL" checked="${descriptor.isTrustSSL()}"/>
     </f:entry>
     <f:entry title="Login Username">
-      <f:textbox field="username" name="rocketUsername" value="${descriptor.getUsername()}"/>
+      <f:textbox field="username" name="rocketUsername" value="${descriptor.getUsername()}" help="Login of the user. Can also be the user id for token based login"/>
     </f:entry>
     <f:entry title="Login password">
-      <f:password field="password" name="rocketPassword" value="${descriptor.getPassword()}"/>
+      <f:password field="password" name="rocketPassword" value="${descriptor.getPassword()}" help="Password of the rocketchat user. Can be also the personal access token"/>
+    </f:entry>
+    <f:entry title="Webhook Token">
+      <f:password field="token" name="webhookToken" value="${descriptor.getWebhookToken()}" help="As alternative for login/password you can use the webhook token here"/>
     </f:entry>
     <f:entry title="Channel" description="Comma separated list of rooms (e.g. #project) and / or persons (e.g. @john)">
       <f:textbox field="channel" name="rocketChannel" value="${descriptor.getChannel()}"/>

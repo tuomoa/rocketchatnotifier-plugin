@@ -5,9 +5,8 @@ import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.HttpRequest;
+import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import org.json.JSONObject;
-
-import java.io.IOException;
 
 /**
  * Authentication using username/ password
@@ -29,8 +28,7 @@ public class RocketChatBasicCallAuthentication implements RocketChatCallAuthenti
     }
     if (!serverUrl.endsWith("api/")) {
       this.serverUrl = serverUrl + "api/";
-    }
-    else {
+    } else {
       this.serverUrl = serverUrl;
     }
     this.user = user;
@@ -43,28 +41,38 @@ public class RocketChatBasicCallAuthentication implements RocketChatCallAuthenti
   }
 
   @Override
-  public void doAuthentication() throws IOException {
+  public void doAuthentication() throws RocketClientException {
     HttpResponse<JsonNode> loginResult;
     String apiURL = serverUrl + "v1/login";
-
+    String userInfoUrl = serverUrl + "v1/me";
     try {
       loginResult = Unirest.post(apiURL).field("user", user).field("password", password).asJson();
-    }
-    catch (UnirestException e) {
-      throw new IOException("Please check if the server API " + apiURL + " is correct: " + e.getMessage(), e);
+    } catch (UnirestException e) {
+      throw new RocketClientException("Please check if the server API " + apiURL + " is correct: (Login-Error 1)", e);
     }
 
     if (loginResult.getStatus() == 401) {
-      throw new IOException("The username and password provided are incorrect.");
+      // try via token
+      try {
+        loginResult = Unirest.get(userInfoUrl).header("X-User-Id", user).header("X-Auth-Token", password).asJson();
+        if (loginResult.getStatus() == 401) {
+          throw new RocketClientException("The username and password provided are incorrect.");
+        }
+        this.userId = user;
+        this.authToken = password;
+      } catch (UnirestException e) {
+        // TODO more logging
+        throw new RocketClientException("Please check if the server API " + apiURL + " is correct (Login-Error 2)", e);
+      }
+    } else {
+      JSONObject data = loginResult.getBody().getObject().getJSONObject("data");
+      this.userId = data.getString("userId");
+      this.authToken = data.getString("authToken");
     }
 
     if (loginResult.getStatus() != 200) {
-      throw new IOException("The login failed with a result of: " + loginResult.getStatus());
+      throw new RocketClientException("The login failed with a result of (Login-Error 3): " + loginResult.getStatus());
     }
-
-    JSONObject data = loginResult.getBody().getObject().getJSONObject("data");
-    this.authToken = data.getString("authToken");
-    this.userId = data.getString("userId");
   }
 
   @Override
