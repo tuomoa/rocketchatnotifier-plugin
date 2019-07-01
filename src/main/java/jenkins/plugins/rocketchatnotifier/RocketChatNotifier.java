@@ -592,7 +592,7 @@ public class RocketChatNotifier extends Notifier {
       }
       catch (Exception e) {
         if (e.getCause() != null &&
-          e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == ValidatorException.class) {
+          (e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == ValidatorException.class)) {
           LOGGER.log(Level.SEVERE, "SSL error during trying to send rocket message", e);
           return FormValidation.error(e, "SSL error", e);
         } else {
