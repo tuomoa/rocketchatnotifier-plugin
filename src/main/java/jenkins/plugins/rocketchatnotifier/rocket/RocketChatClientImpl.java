@@ -1,5 +1,10 @@
 package jenkins.plugins.rocketchatnotifier.rocket;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.GetRequest;
 import jenkins.plugins.rocketchatnotifier.RocketClientImpl;
 import jenkins.plugins.rocketchatnotifier.model.Info;
 import jenkins.plugins.rocketchatnotifier.model.Response;
@@ -10,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONValue;
 import sun.security.validator.ValidatorException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,11 +103,24 @@ public class RocketChatClientImpl implements RocketChatClient {
   }
 
   @Override
-  public Info getInfo() throws RocketClientException {
-    Response res = this.callBuilder.buildCall(RocketChatRestApiV1.Info);
-
+  public String getInfo() throws RocketClientException {
+    Response res;
+    try {
+      res = this.callBuilder.buildCall(RocketChatRestApiV1.Info);
+    } catch (Exception e) {
+      // FIXME, drop usage in future plugin releases
+      // fallback to old path
+      GetRequest req = Unirest.get(this.callBuilder.getServerUrl() + "/api/v1/info");
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      try {
+        res = objectMapper.readValue(req.asString().getBody(), Response.class);
+      } catch (IOException | UnirestException ex) {
+        throw new RocketClientException(e);
+      }
+    }
     if (res.isSuccessful()) {
-      return res.getInfo();
+      return res.getVersion();
     }
     LOG.severe("Could not read information: " + res);
     throw new RocketClientException("The call to get informations was unsuccessful.");
@@ -148,15 +167,13 @@ public class RocketChatClientImpl implements RocketChatClient {
     }
 
     body.put("text", message);
-    if (this.getInfo().getVersion().compareTo("0.50.1") >= 0) {
-      if (emoji != null) {
-        body.put("emoji", emoji);
-      } else if (avatar != null) {
-        body.put("avatar", avatar);
-      }
-      if (attachments != null && attachments.size() > 0) {
-        body.put("attachments", attachments);
-      }
+    if (emoji != null) {
+      body.put("emoji", emoji);
+    } else if (avatar != null) {
+      body.put("avatar", avatar);
+    }
+    if (attachments != null && attachments.size() > 0) {
+      body.put("attachments", attachments);
     }
     final Response res = this.callBuilder.buildCall(RocketChatRestApiV1.PostMessage, null, body);
 

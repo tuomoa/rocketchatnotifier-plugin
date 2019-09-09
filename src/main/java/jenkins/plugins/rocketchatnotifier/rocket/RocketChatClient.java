@@ -92,9 +92,9 @@ public interface RocketChatClient {
   /**
    * Retrieves server information
    *
-   * @return Info
+   * @return Version info
    * @throws RocketClientException in case of communications errors
    */
-  Info getInfo() throws RocketClientException;
+  String getInfo() throws RocketClientException;
 
 }
