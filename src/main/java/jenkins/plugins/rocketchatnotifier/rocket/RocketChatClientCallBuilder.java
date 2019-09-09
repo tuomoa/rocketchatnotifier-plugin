@@ -51,16 +51,20 @@ public class RocketChatClientCallBuilder {
 
   private static final Logger logger = Logger.getLogger(RocketChatClientCallBuilder.class.getName());
 
+  private String serverUrl;
+
   private final ObjectMapper objectMapper;
 
   private final RocketChatCallAuthentication authentication;
 
   protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String user, String password) throws RocketClientException {
     this(new RocketChatBasicCallAuthentication(serverUrl, user, password), serverUrl, trustSSL);
+    this.serverUrl = serverUrl;
   }
 
   protected RocketChatClientCallBuilder(String serverUrl, boolean trustSSL, String webhookToken) throws RocketClientException {
     this(new RocketChatWebhookAuthentication(serverUrl, webhookToken), serverUrl, trustSSL);
+    this.serverUrl = serverUrl;
   }
 
   protected RocketChatClientCallBuilder(RocketChatCallAuthentication authentication, String serverUrl,
@@ -68,6 +72,7 @@ public class RocketChatClientCallBuilder {
     this.authentication = authentication;
     this.objectMapper = new ObjectMapper();
     this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    this.serverUrl = serverUrl;
 
     try {
       Unirest.setHttpClient(createHttpClient(serverUrl, trustSSL));
@@ -152,7 +157,7 @@ public class RocketChatClientCallBuilder {
     final HttpClientBuilder httpClientBuilder = HttpClients.custom();
 
     setConnectionManager(httpClientBuilder, trustSSL);
-   
+
     ProxyConfiguration proxyConfiguration = getProxyConfiguration(serverUrl);
     if (proxyConfiguration != null) {
       setProxy(httpClientBuilder, proxyConfiguration);
@@ -225,5 +230,9 @@ public class RocketChatClientCallBuilder {
       credentialsProvider.setCredentials(new AuthScope(proxyHost), new UsernamePasswordCredentials(username, proxyConfiguration.getPassword()));
       httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
     }
+  }
+
+  public String getServerUrl() {
+    return serverUrl;
   }
 }

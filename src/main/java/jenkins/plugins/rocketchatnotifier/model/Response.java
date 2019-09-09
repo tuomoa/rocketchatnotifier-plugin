@@ -4,13 +4,13 @@ import com.google.common.base.Objects;
 
 public class Response {
   private boolean success;
+  private String version;
   private Message[] messages;
   private Message message;
   private User[] users;
   private User user;
   private Room[] channels;
   private Room channel;
-  private Info info;
 
   public void setSuccess(boolean result) {
     this.success = result;
@@ -72,12 +72,12 @@ public class Response {
     return this.user != null;
   }
 
-  public Info getInfo() {
-    return info;
+  public String getVersion() {
+    return this.version;
   }
 
-  public void setInfo(final Info info) {
-    this.info = info;
+  public void setVersion(final String version) {
+    this.version = version;
   }
 
   @Override
@@ -90,7 +90,7 @@ public class Response {
       .add("user", user)
       .add("channels", channels)
       .add("channel", channel)
-      .add("info", info)
+      .add("version", version)
       .toString();
   }
 }

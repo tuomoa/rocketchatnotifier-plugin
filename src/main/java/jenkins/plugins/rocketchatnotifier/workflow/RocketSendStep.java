@@ -46,6 +46,8 @@ public class RocketSendStep extends AbstractStepImpl {
 
   @Nonnull
   private final String message;
+  private String serverUrl;
+  private boolean trustSSL;
   private String channel;
   private boolean failOnError;
   private String webhookToken;
@@ -63,6 +65,14 @@ public class RocketSendStep extends AbstractStepImpl {
 
   public String getChannel() {
     return channel;
+  }
+
+  public String getServerUrl() {
+    return serverUrl;
+  }
+
+  public boolean isTrustSSL() {
+    return trustSSL;
   }
 
   public String getEmoji() {
@@ -107,6 +117,16 @@ public class RocketSendStep extends AbstractStepImpl {
   @DataBoundSetter
   public void setChannel(String channel) {
     this.channel = Util.fixEmpty(channel);
+  }
+
+  @DataBoundSetter
+  public void setServerUrl(String serverUrl) {
+    this.serverUrl = Util.fixEmpty(serverUrl);
+  }
+
+  @DataBoundSetter
+  public void setTrustSSL(final boolean trustSSL) {
+    this.trustSSL = trustSSL;
   }
 
   public boolean isFailOnError() {
@@ -211,8 +231,8 @@ public class RocketSendStep extends AbstractStepImpl {
       }
       RocketChatNotifier.DescriptorImpl rocketDesc = jenkins.getDescriptorByType(
         RocketChatNotifier.DescriptorImpl.class);
-      String server = rocketDesc.getRocketServerUrl();
-      boolean trustSSL = rocketDesc.isTrustSSL();
+      String server = step.serverUrl != null ? step.serverUrl : rocketDesc.getRocketServerUrl();
+      boolean trustSSL = step.trustSSL || rocketDesc.isTrustSSL();
       String user = rocketDesc.getUsername();
       String password = rocketDesc.getPassword();
       String channel = step.channel != null ? step.channel : rocketDesc.getChannel();
@@ -220,7 +240,7 @@ public class RocketSendStep extends AbstractStepImpl {
       String webhookToken = step.getWebhookToken();
       String webhookTokenCredentialId = step.getWebhookTokenCredentialId();
       // placing in console log to simplify testing of retrieving values from global config or from step field; also used for tests
-      listener.getLogger().println(Messages.RocketSendStepConfig(channel, step.message));
+      listener.getLogger().println(Messages.RocketSendStepConfig(server, trustSSL, channel, step.message));
 
       // getRocketClient needs to be wrapped inside a try-catch because it can fail too if the target RocketChat server does not behave properly.
       try {

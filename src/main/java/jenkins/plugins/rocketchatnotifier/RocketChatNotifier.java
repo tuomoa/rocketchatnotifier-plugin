@@ -2,6 +2,7 @@ package jenkins.plugins.rocketchatnotifier;
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.EnvVars;
 import hudson.Extension;
 import hudson.Launcher;
@@ -77,14 +78,32 @@ public class RocketChatNotifier extends Notifier {
 
   public String getBuildServerUrl() {
     LOGGER.log(Level.FINE, "Getting build server URL");
+    String res = null;
     if (buildServerUrl == null || buildServerUrl.equalsIgnoreCase("")) {
-      JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
-      return jenkinsConfig.getUrl();
+      res = getJenkinsLocationConfiguration().getUrl();
+    } else {
+      res = buildServerUrl;
     }
-    else {
-      return buildServerUrl;
+    if (res == null) {
+      res = "";
+    }
+    return res;
+  }
 
+  /**
+   * Method added to pass findbugs verification when compiling against 1.642.1
+   *
+   * @return The JenkinsLocationConfiguration object.
+   * @throws IllegalStateException if the object is not available (e.g., Jenkins not fully initialized).
+   */
+  @SuppressFBWarnings(value = "NP_NULL_ON_SOME_PATH_FROM_RETURN_VALUE",
+    justification = "False positive. See https://sourceforge.net/p/findbugs/bugs/1411/")
+  private JenkinsLocationConfiguration getJenkinsLocationConfiguration() {
+    final JenkinsLocationConfiguration jlc = JenkinsLocationConfiguration.get();
+    if (jlc == null) {
+      throw new IllegalStateException("JenkinsLocationConfiguration not available");
     }
+    return jlc;
   }
 
   public String getChannel() {
@@ -358,8 +377,7 @@ public class RocketChatNotifier extends Notifier {
     EnvVars env = null;
     try {
       env = r.getEnvironment(listener);
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       listener.getLogger().println("Error retrieving environment vars: " + e.getMessage());
       env = new EnvVars();
     }
@@ -447,13 +465,17 @@ public class RocketChatNotifier extends Notifier {
 
 
     public String getBuildServerUrl() {
+      String res = null;
       if (buildServerUrl == null || buildServerUrl.equalsIgnoreCase("")) {
         JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
-        return jenkinsConfig.getUrl();
+        res = jenkinsConfig.getUrl();
+      } else {
+        res = buildServerUrl;
       }
-      else {
-        return buildServerUrl;
+      if (res == null) {
+        res = "";
       }
+      return res;
     }
 
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
@@ -487,8 +509,7 @@ public class RocketChatNotifier extends Notifier {
         if (attachmentObject != null) {
           if (attachmentObject instanceof JSONObject) {
             attachments.add(MessageAttachment.fromJSON((JSONObject) attachmentObject));
-          }
-          else {
+          } else {
             final JSONArray jsonArray = ((JSONArray) attachmentObject);
             for (int i = 0; i < jsonArray.size(); i++) {
               attachments.add(MessageAttachment.fromJSON(jsonArray.getJSONObject(i)));
@@ -577,8 +598,7 @@ public class RocketChatNotifier extends Notifier {
         RocketClient rocketChatClient;
         if (!StringUtils.isEmpty(targetWebhookToken) || !StringUtils.isEmpty(targetWebhookTokenCredentialId)) {
           rocketChatClient = new RocketClientWebhookImpl(targetServerUrl, targetTrustSSL, targetWebhookToken, targetWebhookTokenCredentialId, channel);
-        }
-        else {
+        } else {
           rocketChatClient = new RocketClientImpl(targetServerUrl, targetTrustSSL, targetUsername, targetPassword, targetChannel);
         }
         String message = "RocketChat/Jenkins plugin: you're all set on " + targetBuildServerUrl;
@@ -589,10 +609,9 @@ public class RocketChatNotifier extends Notifier {
         rocketChatClient.publish(message, null);
         LOGGER.fine("Done publishing message");
         return FormValidation.ok("Success");
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         if (e.getCause() != null &&
-          e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == ValidatorException.class) {
+          (e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == ValidatorException.class)) {
           LOGGER.log(Level.SEVERE, "SSL error during trying to send rocket message", e);
           return FormValidation.error(e, "SSL error", e);
         } else {
