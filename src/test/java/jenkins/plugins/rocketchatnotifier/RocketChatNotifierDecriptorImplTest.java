@@ -47,7 +47,7 @@ public class RocketChatNotifierDecriptorImplTest {
     PowerMockito.when(Jenkins.getInstance()).thenReturn(jenkins);
     File rootPath = new File(System.getProperty("java.io.tmpdir"));
     when(jenkins.getRootDir()).thenReturn(rootPath);
-    when(staplerRequest.getParameter("rocketBuildServerUrl")).thenReturn("jenkins.example.com");
+    when(staplerRequest.getParameter("buildServerUrl")).thenReturn("jenkins.example.com");
     descriptor = new RocketChatNotifier.DescriptorImpl();
 
   }

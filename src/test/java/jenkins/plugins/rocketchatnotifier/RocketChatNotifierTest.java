@@ -1,8 +1,10 @@
 package jenkins.plugins.rocketchatnotifier;
 
+import hudson.DescriptorExtensionList;
 import hudson.EnvVars;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import jenkins.model.GlobalConfiguration;
 import jenkins.model.Jenkins;
 import jenkins.model.JenkinsLocationConfiguration;
 
@@ -22,6 +24,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -45,6 +48,9 @@ public class RocketChatNotifierTest {
   @Mock
   private BuildListener listener;
 
+  @Mock
+  private RocketChatNotifier.DescriptorImpl descriptor;
+
   RocketChatNotifier notifier;
 
   @Before
@@ -53,15 +59,23 @@ public class RocketChatNotifierTest {
     PowerMockito.mockStatic(Jenkins.class, JenkinsLocationConfiguration.class);
     PowerMockito.whenNew(RocketClientImpl.class).withAnyArguments().thenReturn(rocketClient);
     PowerMockito.whenNew(RocketClientWebhookImpl.class).withAnyArguments().thenReturn(rocketClientWithWebhook);
+    when(jenkins.get()).thenReturn(jenkins);
     PowerMockito.when(Jenkins.getInstance()).thenReturn(jenkins);
     File rootPath = new File(System.getProperty("java.io.tmpdir"));
     when(jenkins.getRootDir()).thenReturn(rootPath);
+    DescriptorExtensionList mockList = mock(DescriptorExtensionList.class);
+    when(jenkins.getDescriptorList(GlobalConfiguration.class)).thenReturn(mockList);
     notifier = new RocketChatNotifier(
       EXPECTED_URL, false,
       "user", "password",
       "jenkins", "rocket.example.com",
       false,
-      false, false, false, false, false, false, false, false, false, null, false, false, null, null, null, null);
+      false, false, false, false, false, false, false, false, false, null, false, false, null, null, null, null) {
+      @Override
+      public DescriptorImpl getDescriptor() {
+        return descriptor;
+      }
+    };
   }
 
   @Test
