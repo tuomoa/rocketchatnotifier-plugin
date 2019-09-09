@@ -1,7 +1,5 @@
-version: '3.6'
+version: '3.1'
 services:
-
-
   db:
     container_name: rocketchat_mongo_db
     image: mongo:4.0
