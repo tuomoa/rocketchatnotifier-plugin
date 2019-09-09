@@ -72,7 +72,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
       }
     }
     catch (RocketClientException e) {
-      LOGGER.info("Could not send rocket message");
+      LOGGER.warning("Could not send rocket message: " + e.getMessage());
     }
   }
 
@@ -126,7 +126,7 @@ public class ActiveNotifier implements FineGrainedNotifier {
       }
     }
     catch (RocketClientException e) {
-      LOGGER.info("Could not send rocket message");
+      LOGGER.warning("Could not send rocket message: " + e.getMessage());
     }
   }
 
