@@ -26,8 +26,8 @@ public class RocketClientWebhookImpl implements RocketClient {
 
   private String channel;
 
-  public RocketClientWebhookImpl(String serverUrl, boolean trustSSL, String token, String tokenCredentialId, String channel) throws RocketClientException {
-    client = new RocketChatClientImpl(serverUrl, trustSSL, getTokenToUse(tokenCredentialId, token));
+  public RocketClientWebhookImpl(String serverUrl, boolean trustSSL, String token, String webhookTokenCredentialId, String channel) throws RocketClientException {
+    client = new RocketChatClientImpl(serverUrl, trustSSL, getTokenToUse(webhookTokenCredentialId, token));
     this.channel = channel;
   }
 
@@ -66,9 +66,9 @@ public class RocketClientWebhookImpl implements RocketClient {
     this.client.send("", "Test message from Jenkins via Webhook");
   }
 
-  private String getTokenToUse(String tokenCredentialId, String tokenString) {
-    if (!StringUtils.isEmpty(tokenCredentialId)) {
-      StringCredentials credentials = lookupCredentials(tokenCredentialId);
+  private String getTokenToUse(String webhookTokenCredentialId, String tokenString) {
+    if (!StringUtils.isEmpty(webhookTokenCredentialId)) {
+      StringCredentials credentials = lookupCredentials(webhookTokenCredentialId);
       if (credentials != null) {
         LOGGER.fine("Using Integration Token Credential ID.");
         return credentials.getSecret().getPlainText();

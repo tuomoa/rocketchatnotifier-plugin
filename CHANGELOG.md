@@ -1,4 +1,4 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-09-09)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-09-17)
 
 
 ### Bug Fixes
@@ -6,6 +6,7 @@
 * pom.xml to reduce vulnerabilities ([42593b6](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/42593b6))
 * pom.xml to reduce vulnerabilities ([3a410e6](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/3a410e6))
 * **API:** Use latest info REST API ([e756c22](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e756c22))
+* **Config:** Correct jelly rocketServerURL value ([#69](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/69)) ([08d33e0](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/08d33e0))
 * **deps:** Fix enforcer failure due to credentials upgrade ([#55](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/55)) ([d39d9d1](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/d39d9d1))
 * **Jenkins URL:** use JenkinsLocationConfiguration.get() (JENKINS-59153) ([#54](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/54)) ([1ec2e45](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/1ec2e45))
 * **Logging:** Improve logging for JENKINS-59149 ([c74509b](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/c74509b))
@@ -16,6 +17,7 @@
 ### Features
 
 * **Authentication:** Adding support for personal token login ([4108174](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/4108174))
+* **JCasC:** Adding old branch for JCasC compatibility ([9544fe5](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/9544fe5))
 * **Pipeline:** Allow to customize server while using rocketSend step ([7bea98c](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/7bea98c))
 * **Pipeline:** Allow to customize server while using rocketSend step([JENKINS-58315](https://issues.jenkins-ci.org/browse/JENKINS-58315)) ([f97d1fa](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/f97d1fa))
 * **Testing:** Adding most recent rocketchat versions ([89c5381](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/89c5381))
