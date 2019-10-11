@@ -507,6 +507,52 @@ public class RocketChatNotifier extends Notifier {
       }
     }
 
+    @DataBoundSetter
+    public void setRocketServerUrl(String rocketServerUrl) {
+      this.rocketServerUrl = rocketServerUrl;
+    }
+
+    @DataBoundSetter
+    public void setUsername(String username) {
+      this.username = username;
+    }
+
+    @DataBoundSetter
+    public void setPassword(String password) {
+      this.password = password;
+    }
+
+    @DataBoundSetter
+    public void setChannel(String channel) {
+      this.channel = channel;
+    }
+
+    @DataBoundSetter
+    public void setBuildServerUrl(String buildServerUrl) {
+      this.buildServerUrl = buildServerUrl;
+      if (buildServerUrl == null || buildServerUrl.equalsIgnoreCase("")) {
+        JenkinsLocationConfiguration jenkinsConfig = new JenkinsLocationConfiguration();
+        this.buildServerUrl = jenkinsConfig.getUrl();
+      }
+      if (buildServerUrl != null && !buildServerUrl.endsWith("/")) {
+        this.buildServerUrl = buildServerUrl + "/";
+      }
+    }
+
+    @DataBoundSetter
+    public void setTrustSSL(boolean trustSSL) {
+      this.trustSSL = trustSSL;
+    }
+    @DataBoundSetter
+    public void setWebhookToken(String webhookToken) {
+      this.webhookToken = webhookToken;
+    }
+
+    @DataBoundSetter
+    public void setWebhookTokenCredentialId(String webhookTokenCredentialId) {
+      this.webhookTokenCredentialId = webhookTokenCredentialId;
+    }
+
     public boolean isApplicable(Class<? extends AbstractProject> aClass) {
       return true;
     }
