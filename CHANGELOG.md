@@ -1,10 +1,11 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-10-11)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2019-10-31)
 
 
 ### Bug Fixes
 
 * **API:** Use latest info REST API ([e756c22](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/e756c22))
 * **Config:** Correct jelly rocketServerURL value ([#69](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/69)) ([08d33e0](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/08d33e0))
+* **Config:** Resolve config param naming error [JENKINS-59503] ([f35f535](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/f35f535))
 * **Config:** Resolve config save error [JENKINS-59149] ([05c758f](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/05c758f))
 * **deps:** Fix enforcer failure due to credentials upgrade ([#55](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/55)) ([d39d9d1](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/d39d9d1))
 * **Jenkins URL:** use JenkinsLocationConfiguration.get() (JENKINS-59153) ([#54](https://github.com/jenkinsci/rocketchatnotifier-plugin/issues/54)) ([1ec2e45](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/1ec2e45))
