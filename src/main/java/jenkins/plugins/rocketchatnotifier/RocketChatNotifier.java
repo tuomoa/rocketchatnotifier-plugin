@@ -34,7 +34,6 @@ import sun.security.validator.ValidatorException;
 
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -668,7 +667,7 @@ public class RocketChatNotifier extends Notifier {
     private String password;
     private String channel;
     private boolean trustSSL;
-    private boolean startNotification;
+    private boolean notifyStart;
     private boolean notifySuccess;
     private boolean notifyAborted;
     private boolean notifyNotBuilt;
@@ -688,7 +687,7 @@ public class RocketChatNotifier extends Notifier {
                              String username,
                              String password,
                              String channel,
-                             boolean startNotification,
+                             boolean notifyStart,
                              boolean notifyAborted,
                              boolean notifyFailure,
                              boolean notifyNotBuilt,
@@ -706,7 +705,7 @@ public class RocketChatNotifier extends Notifier {
       this.username = username;
       this.password = password;
       this.channel = channel;
-      this.startNotification = startNotification;
+      this.notifyStart = notifyStart;
       this.notifyAborted = notifyAborted;
       this.notifyFailure = notifyFailure;
       this.notifyNotBuilt = notifyNotBuilt;
@@ -747,8 +746,8 @@ public class RocketChatNotifier extends Notifier {
     }
 
     @Exported
-    public boolean getStartNotification() {
-      return startNotification;
+    public boolean getNotifyStart() {
+      return notifyStart;
     }
 
     @Exported
