@@ -9,7 +9,8 @@ env:
   matrix:
    - RC_VERSION=latest
    - RC_VERSION=develop
-   - RC_VERSION=2.0.0-rc.2
+   - RC_VERSION=2.1.0
+   - RC_VERSION=2.0.0
    - RC_VERSION=1.3.2
    - RC_VERSION=1.2.1
    - RC_VERSION=1.1.3
@@ -42,7 +43,7 @@ env:
 
 script:
   - mvn clean package --quiet
-  - ./docker-build-images.sh && ./docker-run.sh
+  - .bin/docker-build-images.sh && .bin/docker-run.sh
   - travis_retry mvn -Pdocker -Djava.awt.headless=true -Dmaven.test.redirectTestOutputToFile=true -Dcobertura.report.format=xml --fail-at-end --batch-mode cobertura:cobertura verify
 
 cache:
@@ -56,4 +57,3 @@ after_success:
 
 install:
   -
-

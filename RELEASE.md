@@ -10,4 +10,4 @@ mvn jgitflow:release-start && \
  git checkout develop
 ```
 
-or just run `release.sh`
+or just run `.bin/release.sh`
