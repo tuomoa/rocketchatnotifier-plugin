@@ -5,6 +5,9 @@ services:
 
 language: java
 
+jdk:
+  - oraclejdk8
+
 env:
   matrix:
    - RC_VERSION=latest
