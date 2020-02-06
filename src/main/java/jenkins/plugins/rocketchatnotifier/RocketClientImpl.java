@@ -3,8 +3,8 @@ package jenkins.plugins.rocketchatnotifier;
 import jenkins.plugins.rocketchatnotifier.rocket.RocketChatClient;
 import jenkins.plugins.rocketchatnotifier.rocket.RocketChatClientImpl;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
-import sun.security.validator.ValidatorException;
 
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -36,12 +36,10 @@ public class RocketClientImpl implements RocketClient {
       LOGGER.fine("Starting sending message to channel " + this.channel);
       this.client.send(this.channel, message, null, null, attachments);
       return true;
-    }
-    catch (RocketClientException e) {
+    } catch (RocketClientException e) {
       LOGGER.log(Level.SEVERE, "I/O error error during publishing message", e);
       return false;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Unknown error error during publishing message", e);
       return false;
     }
@@ -53,19 +51,17 @@ public class RocketClientImpl implements RocketClient {
       LOGGER.fine("Starting sending message to channel " + this.channel);
       this.client.send(this.channel, message, emoji, avatar, attachments);
       return true;
-    }
-    catch (RocketClientException e) {
+    } catch (RocketClientException e) {
       LOGGER.log(Level.SEVERE, "I/O error error during publishing message", e);
       return false;
-    }
-    catch (Exception e) {
+    } catch (Exception e) {
       LOGGER.log(Level.SEVERE, "Unknown error error during publishing message", e);
       return false;
     }
   }
 
   @Override
-  public void validate() throws ValidatorException, RocketClientException {
+  public void validate() throws CertificateException, RocketClientException {
     LOGGER.fine("Starting validating");
     this.client.getChannels();
   }

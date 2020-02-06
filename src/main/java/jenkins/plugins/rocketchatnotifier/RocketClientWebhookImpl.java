@@ -10,8 +10,8 @@ import jenkins.plugins.rocketchatnotifier.rocket.RocketChatClientImpl;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import sun.security.validator.ValidatorException;
 
+import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +62,7 @@ public class RocketClientWebhookImpl implements RocketClient {
   }
 
   @Override
-  public void validate() throws ValidatorException, RocketClientException {
+  public void validate() throws CertificateException, RocketClientException {
     this.client.send("", "Test message from Jenkins via Webhook");
   }
 
