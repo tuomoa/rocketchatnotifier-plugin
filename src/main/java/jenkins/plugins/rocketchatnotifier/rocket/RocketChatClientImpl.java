@@ -6,16 +6,15 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.mashape.unirest.request.GetRequest;
 import jenkins.plugins.rocketchatnotifier.RocketClientImpl;
-import jenkins.plugins.rocketchatnotifier.model.Info;
 import jenkins.plugins.rocketchatnotifier.model.Response;
 import jenkins.plugins.rocketchatnotifier.model.Room;
 import jenkins.plugins.rocketchatnotifier.model.User;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONValue;
-import sun.security.validator.ValidatorException;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,24 +126,24 @@ public class RocketChatClientImpl implements RocketChatClient {
   }
 
   @Override
-  public void send(Room room, String message) throws ValidatorException, RocketClientException {
+  public void send(Room room, String message) throws CertificateException, RocketClientException {
     this.send(room.getName(), message);
   }
 
   @Override
-  public void send(String channelName, String message) throws ValidatorException, RocketClientException {
+  public void send(String channelName, String message) throws CertificateException, RocketClientException {
     this.send(channelName, message, null, null);
   }
 
   @Override
   public void send(final String channelName, final String message, final String emoji, final String avatar)
-    throws ValidatorException, RocketClientException {
+    throws CertificateException, RocketClientException {
     this.send(channelName, message, emoji, avatar, null);
   }
 
   @Override
   public void send(final String channelName, final String message, final String emoji, final String avatar, final List<Map<String, Object>> attachments)
-    throws ValidatorException, RocketClientException {
+    throws CertificateException, RocketClientException {
     if (!channelName.contains(",")) {
       sendSingleMessage(channelName, message, emoji, avatar, attachments);
       return;
@@ -181,7 +180,7 @@ public class RocketChatClientImpl implements RocketChatClient {
       LOG.fine("Message sent was successfull.");
     } else {
       LOG.severe("Could not send message: " + res);
-      throw new RocketClientException("The send of the message was unsuccessful.");
+      throw new RocketClientException("The send of the message was unsuccessful. " + res);
     }
   }
 

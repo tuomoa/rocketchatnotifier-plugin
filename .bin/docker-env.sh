@@ -2,7 +2,7 @@
 
 export MONGO_PORT=27017
 export RC_PORT=44443
-export RC_VERSION=${RC_VERSION:-"develop"}
+export RC_VERSION=${RC_VERSION:-"0.74.3"}
 
 # Rocket
 

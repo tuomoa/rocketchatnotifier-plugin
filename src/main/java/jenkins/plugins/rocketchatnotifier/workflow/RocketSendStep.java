@@ -55,6 +55,7 @@ public class RocketSendStep extends AbstractStepImpl {
 
   private String emoji;
   private String avatar;
+  private String color;
   private boolean rawMessage;
   private List<MessageAttachment> attachments;
 
@@ -83,6 +84,10 @@ public class RocketSendStep extends AbstractStepImpl {
     return avatar;
   }
 
+  public String getColor() {
+    return color;
+  }
+
   public boolean isRawMessage() {
     return rawMessage;
   }
@@ -107,6 +112,11 @@ public class RocketSendStep extends AbstractStepImpl {
   @DataBoundSetter
   public void setAvatar(final String avatar) {
     this.avatar = Util.fixEmpty(avatar);
+  }
+
+  @DataBoundSetter
+  public void setColor(final String color) {
+    this.color = Util.fixEmpty(color);
   }
 
   @DataBoundSetter

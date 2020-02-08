@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 git checkout develop
+git branch -D master
 mvn gitflow:release-start && \
  conventional-changelog -p angular -i CHANGELOG.md -s -r 0 && \
  git add CHANGELOG.md && \

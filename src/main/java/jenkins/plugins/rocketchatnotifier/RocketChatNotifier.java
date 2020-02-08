@@ -30,10 +30,10 @@ import org.kohsuke.stapler.DataBoundSetter;
 import org.kohsuke.stapler.QueryParameter;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.export.Exported;
-import sun.security.validator.ValidatorException;
 
 import javax.net.ssl.SSLHandshakeException;
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -542,6 +542,7 @@ public class RocketChatNotifier extends Notifier {
     public void setTrustSSL(boolean trustSSL) {
       this.trustSSL = trustSSL;
     }
+
     @DataBoundSetter
     public void setWebhookToken(String webhookToken) {
       this.webhookToken = webhookToken;
@@ -626,7 +627,7 @@ public class RocketChatNotifier extends Notifier {
         return FormValidation.ok("Success");
       } catch (Exception e) {
         if (e.getCause() != null &&
-          e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == ValidatorException.class) {
+          e.getCause().getClass() == SSLHandshakeException.class || e.getCause().getClass() == CertificateException.class) {
           LOGGER.log(Level.SEVERE, "SSL error during trying to send rocket message", e);
           return FormValidation.error(e, "SSL error", e);
         } else {
