@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-source ./docker-env.sh
+source ./.bin/docker-env.sh
 
 docker-compose create

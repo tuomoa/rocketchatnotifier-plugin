@@ -12,9 +12,10 @@ docker-compose rm -f
 
 docker-compose up -d
 
+while ! echo exit | nc localhost ${MONGO_PORT}; do sleep 30; done
+echo "MongoDB up and running"
 
-# Show logs. Hit 'Ctrl + c' to exit.
-# docker-compose logs -f
+while ! echo exit | nc localhost ${RC_PORT}; do sleep 30; done
+echo "RocketChat up and running"
 
-while ! echo exit | nc localhost ${RC_PORT}; do sleep 10; done
 sleep 30
