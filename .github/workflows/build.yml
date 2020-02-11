@@ -21,7 +21,7 @@ jobs:
 
     steps:
     - name: publish release package
-      if: github.ref == 'master'
+      if: contains( github.ref, 'master' ) || contains( github.base_ref, 'master' )
       env:
         JENKINS_MAVEN_PASS: ${{ secrets.JENKINS_MAVEN_PASS }}
       run: ./mvnw -s .github/workflows/m2.settings.xml deploy -DskipTests=true
