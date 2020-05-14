@@ -39,7 +39,7 @@
 
   <name>RocketChat Notifier</name>
   <artifactId>rocketchatnotifier</artifactId>
-  <version>1.4.9</version>
+  <version>1.4.10-SNAPSHOT</version>
   <packaging>hpi</packaging>
 
   <licenses>
