@@ -1,4 +1,4 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2020-02-08)
+# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2020-05-14)
 
 
 ### Bug Fixes

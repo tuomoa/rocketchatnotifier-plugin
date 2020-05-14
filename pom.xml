@@ -16,7 +16,7 @@
     <failsafeArgLine/>
     <skipITs>false</skipITs>
     <!-- Project Libs-->
-    <httpclient.version>4.5.5</httpclient.version>
+    <httpclient.version>4.5.12</httpclient.version>
     <unirest.version>1.4.9</unirest.version>
     <jackson.version>2.10.0.pr3</jackson.version>
     <hamcrest.version>2.1</hamcrest.version>
@@ -32,14 +32,14 @@
     <mongo.port>27017</mongo.port>
     <!-- Maven Plugins -->
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-    <maven-site-plugin.version>3.8.2</maven-site-plugin.version>
+    <maven-site-plugin.version>3.9.0</maven-site-plugin.version>
     <plugin.gitflow-maven.version>1.5.0</plugin.gitflow-maven.version>
 
   </properties>
 
   <name>RocketChat Notifier</name>
   <artifactId>rocketchatnotifier</artifactId>
-  <version>1.4.8</version>
+  <version>1.4.9</version>
   <packaging>hpi</packaging>
 
   <licenses>
@@ -226,7 +226,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>4.13</version>
       <scope>test</scope>
     </dependency>
     <!-- only here to prevent from being included inside hpi for hudson parent, not needed by project at all -->

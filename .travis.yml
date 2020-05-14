@@ -12,6 +12,7 @@ env:
   matrix:
    - RC_VERSION=latest
    - RC_VERSION=develop
+   - RC_VERSION=3.0.0
    - RC_VERSION=2.4.7
    - RC_VERSION=2.3.3
    - RC_VERSION=2.2.1
