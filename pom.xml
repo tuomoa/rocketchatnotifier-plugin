@@ -16,7 +16,7 @@
     <failsafeArgLine/>
     <skipITs>false</skipITs>
     <!-- Project Libs-->
-    <httpclient.version>4.5.12</httpclient.version>
+    <httpclient.version>4.5.13</httpclient.version>
     <unirest.version>1.4.9</unirest.version>
     <jackson.version>2.10.0.pr3</jackson.version>
     <hamcrest.version>2.1</hamcrest.version>
@@ -32,14 +32,14 @@
     <mongo.port>27017</mongo.port>
     <!-- Maven Plugins -->
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
-    <maven-site-plugin.version>3.9.0</maven-site-plugin.version>
+    <maven-site-plugin.version>3.9.1</maven-site-plugin.version>
     <plugin.gitflow-maven.version>1.5.0</plugin.gitflow-maven.version>
 
   </properties>
 
   <name>RocketChat Notifier</name>
   <artifactId>rocketchatnotifier</artifactId>
-  <version>1.4.9</version>
+  <version>1.4.10</version>
   <packaging>hpi</packaging>
 
   <licenses>
@@ -369,10 +369,10 @@
 
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://jenkins.ci.cloudbees.com/job/plugins/job/rocketchatnotifier-plugin/</url>
+    <url>https://ci.jenkins.io/job/Plugins/job/rocketchatnotifier-plugin/</url>
   </ciManagement>
 
-  <url>https://plugins.jenkins.io/rocketchatnotifier</url>
+  <url>https://github.com/jenkinsci/rocketchatnotifier-plugin/blob/develop/README.md</url>
 
   <developers>
     <developer>
