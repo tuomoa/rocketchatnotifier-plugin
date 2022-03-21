@@ -31,7 +31,7 @@
     <!-- Maven Plugins -->
     <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
     <maven-site-plugin.version>3.11.0</maven-site-plugin.version>
-    <plugin.gitflow-maven.version>1.16.0</plugin.gitflow-maven.version>
+    <maven-gitflow-plugin.version>1.18.0</maven-gitflow-plugin.version>
 
   </properties>
 
@@ -75,7 +75,7 @@
           <version>2.22.2</version>
           <configuration>
             <!-- see: https://stackoverflow.com/questions/53010200/maven-surefire-could-not-find-forkedbooter-class -->
-            <argLine>-Xmx1024m -Xms1024m -XX:MaxPermSize=512m -Djdk.net.URLClassPath.disableClassPathURLCheck=true
+            <argLine>-Xmx1024m -Xms1024m -Djdk.net.URLClassPath.disableClassPathURLCheck=true
             </argLine>
             <includes>
               <include>**/*Test.java</include>
@@ -90,8 +90,10 @@
         <plugin>
           <groupId>com.amashchenko.maven.plugin</groupId>
           <artifactId>gitflow-maven-plugin</artifactId>
-          <version>${plugin.gitflow-maven.version}</version>
+          <version>${maven-gitflow-plugin.version}</version>
           <configuration>
+            <installProject>false</installProject>
+            <verbose>false</verbose>
             <gitFlowConfig>
               <productionBranch>master</productionBranch>
               <developmentBranch>develop</developmentBranch>
