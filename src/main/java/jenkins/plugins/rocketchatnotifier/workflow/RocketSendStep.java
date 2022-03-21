@@ -4,6 +4,7 @@ import static com.cloudbees.plugins.credentials.CredentialsProvider.lookupCreden
 
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.cloudbees.plugins.credentials.domains.DomainRequirement;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import hudson.AbortException;
 import hudson.Extension;
 import hudson.Util;
@@ -16,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import jenkins.model.Jenkins;
 import jenkins.plugins.rocketchatnotifier.Messages;
@@ -43,7 +43,7 @@ public class RocketSendStep extends AbstractStepImpl {
 
   private static final Logger LOG = Logger.getLogger(RocketSendStep.class.getName());
 
-  @Nonnull
+  @NonNull
   private final String message;
   private String serverUrl;
   private boolean trustSSL;
@@ -59,7 +59,7 @@ public class RocketSendStep extends AbstractStepImpl {
   private List<MessageAttachment> attachments;
   private boolean useGlobalWebhookToken;
 
-  @Nonnull
+  @NonNull
   public String getMessage() {
     return message;
   }
@@ -173,7 +173,7 @@ public class RocketSendStep extends AbstractStepImpl {
   }
 
   @DataBoundConstructor
-  public RocketSendStep(@Nonnull String message) {
+  public RocketSendStep(@NonNull String message) {
     this.message = message;
   }
 
@@ -195,14 +195,14 @@ public class RocketSendStep extends AbstractStepImpl {
     }
 
     public ListBoxModel doFillWebhookTokenCredentialIdItems() {
-      if (!Jenkins.getInstance().hasPermission(Jenkins.ADMINISTER)) {
+      if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
         return new ListBoxModel();
       }
       return new StandardListBoxModel()
         .withEmptySelection()
         .withAll(lookupCredentials(
           StringCredentials.class,
-          Jenkins.getInstance(),
+          Jenkins.get(),
           ACL.SYSTEM,
           Collections.<DomainRequirement>emptyList())
         );
@@ -240,9 +240,9 @@ public class RocketSendStep extends AbstractStepImpl {
 
       //default to global config values if not set in step, but allow step to override all global settings
       Jenkins jenkins;
-      //Jenkins.getInstance() may return null, no message sent in that case
+      //Jenkins.getInstanceOrNull() may return null, no message sent in that case
       try {
-        jenkins = Jenkins.getInstance();
+        jenkins = Jenkins.get();
       }
       catch (NullPointerException ne) {
         listener.error(Messages.NotificationFailedWithException(ne));
