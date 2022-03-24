@@ -1,4 +1,19 @@
-# [](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v) (2021-09-13)
+# [1.5.0](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.10...v1.5.0) (2022-03-24)
+
+
+### Bug Fixes
+
+* **FindBugs:** Resolve NPE error ([ed89b66](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/ed89b66e708bf23d6dd1a58e7ebafdf84c0877ee))
+* **FindBugs:** Resolve possible NPE issues ([214d7bd](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/214d7bdab415394fadaff0a46a4b86f88f0ea9ad))
+* **Security:** Improve credential handling ([1a0023b](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/1a0023be9f2e143434d028d5292ef9dc3195d051))
+* **Security:** Improve credential handling ([2b0797e](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/2b0797ecb81b86fa25585c3bacb9c617d9f265aa))
+
+
+### Features
+
+* **Security:** Drop explizit logging dependencies ([690a906](https://github.com/jenkinsci/rocketchatnotifier-plugin/commit/690a9066d856e3aca371db1e0ca3f12cf1b46342))
+
+# [1.4.10](https://github.com/jenkinsci/rocketchatnotifier-plugin/compare/v1.4.0...v1.4.10) (2021-09-13)
 
 
 ### Bug Fixes
@@ -210,6 +225,3 @@
 
 
 # 0.2.0 (2016-09-16)
-
-
-
