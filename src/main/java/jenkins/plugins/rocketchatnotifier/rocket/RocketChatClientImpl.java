@@ -1,15 +1,20 @@
 package jenkins.plugins.rocketchatnotifier.rocket;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import com.mashape.unirest.request.GetRequest;
 import jenkins.plugins.rocketchatnotifier.RocketClientImpl;
-import jenkins.plugins.rocketchatnotifier.model.Info;
 import jenkins.plugins.rocketchatnotifier.model.Response;
 import jenkins.plugins.rocketchatnotifier.model.Room;
 import jenkins.plugins.rocketchatnotifier.model.User;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import org.apache.commons.lang.StringUtils;
 import org.json.simple.JSONValue;
-import sun.security.validator.ValidatorException;
 
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -97,35 +102,48 @@ public class RocketChatClientImpl implements RocketChatClient {
   }
 
   @Override
-  public Info getInfo() throws RocketClientException {
-    Response res = this.callBuilder.buildCall(RocketChatRestApiV1.Info);
-
+  public String getInfo() throws RocketClientException {
+    Response res;
+    try {
+      res = this.callBuilder.buildCall(RocketChatRestApiV1.Info);
+    } catch (Exception e) {
+      // FIXME, drop usage in future plugin releases
+      // fallback to old path
+      GetRequest req = Unirest.get(this.callBuilder.getServerUrl() + "/api/v1/info");
+      ObjectMapper objectMapper = new ObjectMapper();
+      objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+      try {
+        res = objectMapper.readValue(req.asString().getBody(), Response.class);
+      } catch (IOException | UnirestException ex) {
+        throw new RocketClientException(e);
+      }
+    }
     if (res.isSuccessful()) {
-      return res.getInfo();
+      return res.getVersion();
     }
     LOG.severe("Could not read information: " + res);
     throw new RocketClientException("The call to get informations was unsuccessful.");
   }
 
   @Override
-  public void send(Room room, String message) throws ValidatorException, RocketClientException {
+  public void send(Room room, String message) throws CertificateException, RocketClientException {
     this.send(room.getName(), message);
   }
 
   @Override
-  public void send(String channelName, String message) throws ValidatorException, RocketClientException {
+  public void send(String channelName, String message) throws CertificateException, RocketClientException {
     this.send(channelName, message, null, null);
   }
 
   @Override
   public void send(final String channelName, final String message, final String emoji, final String avatar)
-    throws ValidatorException, RocketClientException {
+    throws CertificateException, RocketClientException {
     this.send(channelName, message, emoji, avatar, null);
   }
 
   @Override
   public void send(final String channelName, final String message, final String emoji, final String avatar, final List<Map<String, Object>> attachments)
-    throws ValidatorException, RocketClientException {
+    throws CertificateException, RocketClientException {
     if (!channelName.contains(",")) {
       sendSingleMessage(channelName, message, emoji, avatar, attachments);
       return;
@@ -148,15 +166,13 @@ public class RocketChatClientImpl implements RocketChatClient {
     }
 
     body.put("text", message);
-    if (this.getInfo().getVersion().compareTo("0.50.1") >= 0) {
-      if (emoji != null) {
-        body.put("emoji", emoji);
-      } else if (avatar != null) {
-        body.put("avatar", avatar);
-      }
-      if (attachments != null && attachments.size() > 0) {
-        body.put("attachments", attachments);
-      }
+    if (emoji != null) {
+      body.put("emoji", emoji);
+    } else if (avatar != null) {
+      body.put("avatar", avatar);
+    }
+    if (attachments != null && attachments.size() > 0) {
+      body.put("attachments", attachments);
     }
     final Response res = this.callBuilder.buildCall(RocketChatRestApiV1.PostMessage, null, body);
 
@@ -164,7 +180,7 @@ public class RocketChatClientImpl implements RocketChatClient {
       LOG.fine("Message sent was successfull.");
     } else {
       LOG.severe("Could not send message: " + res);
-      throw new RocketClientException("The send of the message was unsuccessful.");
+      throw new RocketClientException("The send of the message was unsuccessful. " + res);
     }
   }
 

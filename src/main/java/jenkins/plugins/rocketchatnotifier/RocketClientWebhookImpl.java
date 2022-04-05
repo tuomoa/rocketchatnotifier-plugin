@@ -10,8 +10,8 @@ import jenkins.plugins.rocketchatnotifier.rocket.RocketChatClientImpl;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
 import org.apache.commons.lang.StringUtils;
 import org.jenkinsci.plugins.plaincredentials.StringCredentials;
-import sun.security.validator.ValidatorException;
 
+import java.security.cert.CertificateException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +26,8 @@ public class RocketClientWebhookImpl implements RocketClient {
 
   private String channel;
 
-  public RocketClientWebhookImpl(String serverUrl, boolean trustSSL, String token, String tokenCredentialId, String channel) throws RocketClientException {
-    client = new RocketChatClientImpl(serverUrl, trustSSL, getTokenToUse(tokenCredentialId, token));
+  public RocketClientWebhookImpl(String serverUrl, boolean trustSSL, String token, String webhookTokenCredentialId, String channel) throws RocketClientException {
+    client = new RocketChatClientImpl(serverUrl, trustSSL, getTokenToUse(webhookTokenCredentialId, token));
     this.channel = channel;
   }
 
@@ -62,13 +62,13 @@ public class RocketClientWebhookImpl implements RocketClient {
   }
 
   @Override
-  public void validate() throws ValidatorException, RocketClientException {
+  public void validate() throws CertificateException, RocketClientException {
     this.client.send("", "Test message from Jenkins via Webhook");
   }
 
-  private String getTokenToUse(String tokenCredentialId, String tokenString) {
-    if (!StringUtils.isEmpty(tokenCredentialId)) {
-      StringCredentials credentials = lookupCredentials(tokenCredentialId);
+  private String getTokenToUse(String webhookTokenCredentialId, String tokenString) {
+    if (!StringUtils.isEmpty(webhookTokenCredentialId)) {
+      StringCredentials credentials = lookupCredentials(webhookTokenCredentialId);
       if (credentials != null) {
         LOGGER.fine("Using Integration Token Credential ID.");
         return credentials.getSecret().getPlainText();
@@ -82,7 +82,7 @@ public class RocketClientWebhookImpl implements RocketClient {
 
   private StringCredentials lookupCredentials(String credentialId) {
     List<StringCredentials> credentials = com.cloudbees.plugins.credentials.CredentialsProvider.lookupCredentials(
-      StringCredentials.class, Jenkins.getInstance(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
+      StringCredentials.class, Jenkins.getInstanceOrNull(), ACL.SYSTEM, Collections.<DomainRequirement>emptyList());
     CredentialsMatcher matcher = CredentialsMatchers.withId(credentialId);
     return CredentialsMatchers.firstOrNull(credentials, matcher);
   }

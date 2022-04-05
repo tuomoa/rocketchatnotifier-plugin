@@ -1,26 +1,29 @@
-version: '2.1'
+version: '3.1'
 services:
-
   db:
-    container_name: mongo_db
-    image: mongo:latest
+    container_name: rocketchat_mongo_db
+    image: mongo:4.0
+    command: "mongod --smallfiles --oplogSize 128 --replSet rs0"
     environment:
       - MONGO_PORT
     ports:
       - "${MONGO_PORT}:${MONGO_PORT}"
-    healthcheck:
-        test: ["CMD", "curl", "-f", "http://localhost:${MONGO_PORT}"]
-        interval: 30s
-        timeout: 10s
-        retries: 5
+
+  mongo-init-replica:
+    container_name: rocketchat_mongo_init
+    image: mongo:4.0
+    command: 'bash -c "for i in `seq 1 30`; do mongo db/rocketchat --eval \"rs.initiate({ _id: ''rs0'', members: [ { _id: 0, host: ''db:27017'' } ]})\" && s=$$? && break || s=$$?; echo \"Tried $$i times. Waiting 5 secs...\"; sleep 5; done; (exit $$s)"'
+    depends_on:
+      - db
 
   rocketchat:
-    container_name: rocketchat
+    container_name: rocketchat_app
     image: rocketchat/rocket.chat:${RC_VERSION}
     environment:
       - RC_VERSION
       - RC_PORT
       - MONGO_URL
+      - MONGO_OPLOG_URL
       - HOME
       - PORT
       - ROOT_URL
@@ -28,9 +31,10 @@ services:
       - ADMIN_USERNAME
       - ADMIN_PASS
       - ADMIN_EMAIL
-    depends_on:
-      - db
+    restart: unless-stopped
     links:
+      - db
+    depends_on:
       - db
     ports:
       - "${RC_PORT}:${RC_PORT}"

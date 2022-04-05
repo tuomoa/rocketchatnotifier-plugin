@@ -32,7 +32,7 @@ public enum RocketChatRestApiV1 {
   private HttpMethods httpMethod;
   private boolean requiresAuth;
 
-  private RocketChatRestApiV1(String methodName, HttpMethods httpMethod, boolean requiresAuth) {
+  RocketChatRestApiV1(String methodName, HttpMethods httpMethod, boolean requiresAuth) {
     this.methodName = methodName;
     this.httpMethod = httpMethod;
     this.requiresAuth = requiresAuth;

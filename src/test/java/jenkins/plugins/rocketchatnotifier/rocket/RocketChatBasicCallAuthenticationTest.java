@@ -38,28 +38,28 @@ public class RocketChatBasicCallAuthenticationTest {
   public void shouldTryTokenBasedAuthToo() throws Exception {
     prepareMock(401,200);
     RocketChatBasicCallAuthentication chatBasicCallAuthentication = new RocketChatBasicCallAuthentication("example.com/", "a", "b");
-    assertThat(chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.Info), is(equalTo("https://example.com/api/v1/info")));
+    assertThat(chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.ChannelsList), is(equalTo("https://example.com/api/v1/channels.list")));
   }
 
   @Test
   public void shouldNotAppendSlashToRootUrlIfAlreadyGiven() throws Exception {
     RocketChatBasicCallAuthentication chatBasicCallAuthentication = new RocketChatBasicCallAuthentication("example.com/", "a", "b");
-    String sampleCall = chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.Info);
-    assertThat(sampleCall, is(equalTo("https://example.com/api/v1/info")));
+    String sampleCall = chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.ChannelsList);
+    assertThat(sampleCall, is(equalTo("https://example.com/api/v1/channels.list")));
   }
 
   @Test
   public void shouldAppendApiPathIfNotGiven() throws Exception {
     RocketChatBasicCallAuthentication chatBasicCallAuthentication = new RocketChatBasicCallAuthentication("example.com", "a", "b");
-    String sampleCall = chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.Info);
-    assertThat(sampleCall, is(equalTo("https://example.com/api/v1/info")));
+    String sampleCall = chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.ChannelsList);
+    assertThat(sampleCall, is(equalTo("https://example.com/api/v1/channels.list")));
   }
 
   @Test
   public void shouldNotAppendApiPathIfiven() throws Exception {
     RocketChatBasicCallAuthentication chatBasicCallAuthentication = new RocketChatBasicCallAuthentication("example.com/api", "a", "b");
-    String sampleCall = chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.Info);
-    assertThat(sampleCall, is(equalTo("https://example.com/api/v1/info")));
+    String sampleCall = chatBasicCallAuthentication.getUrlForRequest(RocketChatRestApiV1.ChannelsList);
+    assertThat(sampleCall, is(equalTo("https://example.com/api/v1/channels.list")));
   }
 
   @Test(expected = RocketClientException.class)

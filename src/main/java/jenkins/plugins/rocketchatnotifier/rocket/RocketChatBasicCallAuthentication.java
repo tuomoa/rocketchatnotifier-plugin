@@ -77,7 +77,12 @@ public class RocketChatBasicCallAuthentication implements RocketChatCallAuthenti
 
   @Override
   public String getUrlForRequest(RocketChatRestApiV1 call) {
-    return serverUrl + call.getMethodName();
+    // /api/info should be used without prefix, see https://rocket.chat/docs/developer-guides/rest-api/miscellaneous/info/
+    if (call.getMethodName().contains("/info")) {
+      return serverUrl + "info";
+    } else {
+      return serverUrl + call.getMethodName();
+    }
   }
 
   @Override

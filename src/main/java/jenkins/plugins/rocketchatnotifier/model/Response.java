@@ -1,16 +1,17 @@
 package jenkins.plugins.rocketchatnotifier.model;
 
-import com.google.common.base.Objects;
+import java.util.Arrays;
 
 public class Response {
   private boolean success;
+  private String version;
   private Message[] messages;
   private Message message;
   private User[] users;
   private User user;
   private Room[] channels;
   private Room channel;
-  private Info info;
+  private String error;
 
   public void setSuccess(boolean result) {
     this.success = result;
@@ -72,25 +73,43 @@ public class Response {
     return this.user != null;
   }
 
-  public Info getInfo() {
-    return info;
+  public String getVersion() {
+    return this.version;
   }
 
-  public void setInfo(final Info info) {
-    this.info = info;
+  public void setVersion(final String version) {
+    this.version = version;
+  }
+
+  public String getError() {
+    return error;
+  }
+
+  public void setError(String error) {
+    this.error = error;
   }
 
   @Override
   public String toString() {
-    return Objects.toStringHelper(this)
-      .add("success", success)
-      .add("messages", messages)
-      .add("message", message)
-      .add("users", users)
-      .add("user", user)
-      .add("channels", channels)
-      .add("channel", channel)
-      .add("info", info)
-      .toString();
+    return "Response{"
+        + "success="
+        + success
+        + ", messages="
+        + Arrays.toString(messages)
+        + ", message="
+        + message
+        + ", users="
+        + Arrays.toString(users)
+        + ", user="
+        + user
+        + ", channels="
+        + Arrays.toString(channels)
+        + ", channel="
+        + channel
+        + ", version="
+        + version
+        + ", error="
+        + error
+        + "}";
   }
 }

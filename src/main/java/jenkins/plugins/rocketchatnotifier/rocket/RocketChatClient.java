@@ -1,11 +1,10 @@
 package jenkins.plugins.rocketchatnotifier.rocket;
 
-import jenkins.plugins.rocketchatnotifier.model.Info;
 import jenkins.plugins.rocketchatnotifier.model.Room;
 import jenkins.plugins.rocketchatnotifier.model.User;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
-import sun.security.validator.ValidatorException;
 
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 
@@ -46,20 +45,20 @@ public interface RocketChatClient {
    *
    * @param room    to use (aka channel)
    * @param message to send
-   * @throws ValidatorException    in case of SSL errors
+   * @throws CertificateException    in case of SSL errors
    * @throws RocketClientException in case of communication errors with the RocketChat server backend
    */
-  void send(Room room, String message) throws ValidatorException, RocketClientException;
+  void send(Room room, String message) throws CertificateException, RocketClientException;
 
   /**
    * sends a message to a channel
    *
    * @param channelName to use
    * @param message     to send
-   * @throws ValidatorException    in case of SSL errors
+   * @throws CertificateException    in case of SSL errors
    * @throws RocketClientException in case of communication errors with the RocketChat server backend
    */
-  void send(String channelName, String message) throws ValidatorException, RocketClientException;
+  void send(String channelName, String message) throws CertificateException, RocketClientException;
 
   /**
    * sends a message to a channel.
@@ -69,10 +68,10 @@ public interface RocketChatClient {
    * @param message     to send
    * @param emoji       to display
    * @param avatar      to display
-   * @throws ValidatorException    in case of SSL errors
+   * @throws CertificateException    in case of SSL errors
    * @throws RocketClientException in case of communication errors with the RocketChat server backend
    */
-  void send(String channelName, String message, String emoji, String avatar) throws ValidatorException, RocketClientException;
+  void send(String channelName, String message, String emoji, String avatar) throws CertificateException, RocketClientException;
 
   /**
    * sends a message to a channel.
@@ -83,18 +82,18 @@ public interface RocketChatClient {
    * @param emoji       to display
    * @param avatar      to display
    * @param attachments to send
-   * @throws ValidatorException    in case of SSL errors
+   * @throws CertificateException    in case of SSL errors
    * @throws RocketClientException in case of communication errors with the RocketChat server backend
    */
   void send(String channelName, String message, String emoji, String avatar, List<Map<String, Object>> attachments)
-    throws ValidatorException, RocketClientException;
+    throws CertificateException, RocketClientException;
 
   /**
    * Retrieves server information
    *
-   * @return Info
+   * @return Version info
    * @throws RocketClientException in case of communications errors
    */
-  Info getInfo() throws RocketClientException;
+  String getInfo() throws RocketClientException;
 
 }

@@ -1,6 +1,5 @@
 package jenkins.plugins.rocketchatnotifier.rocket;
 
-import jenkins.plugins.rocketchatnotifier.model.Info;
 import jenkins.plugins.rocketchatnotifier.model.Response;
 import jenkins.plugins.rocketchatnotifier.model.Room;
 import jenkins.plugins.rocketchatnotifier.rocket.errorhandling.RocketClientException;
@@ -110,9 +109,7 @@ public class RocketChatClientImplTest {
     // given
     final Response infoResponse = new Response();
     infoResponse.setSuccess(true);
-    final Info info = new Info();
-    info.setVersion("0.52.1");
-    infoResponse.setInfo(info);
+    infoResponse.setVersion("0.52.1");
     final Response errorResponse = new Response();
     errorResponse.setSuccess(false);
     when(callBuilder.buildCall(RocketChatRestApiV1.Info)).thenReturn(infoResponse);
@@ -196,9 +193,7 @@ public class RocketChatClientImplTest {
   private Response mockInfoRequest() throws RocketClientException {
     final Response infoResponse = new Response();
     infoResponse.setSuccess(true);
-    final Info info = new Info();
-    info.setVersion("0.52.1");
-    infoResponse.setInfo(info);
+    infoResponse.setVersion("0.52.1");
     final Response response = new Response();
     response.setSuccess(true);
     when(callBuilder.buildCall(RocketChatRestApiV1.Info)).thenReturn(infoResponse);
